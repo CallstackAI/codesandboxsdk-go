@@ -38,3 +38,12 @@ func main() {
 go install github.com/deepmap/oapi-codegen/v2/cmd/oapi-codegen@v2.2.0
 oapi-codegen -config cfg.yaml openapi-time.yaml
 ```
+
+## OpenAPI Specification
+
+Some modifications to specification were made to make it compatible with the generator.
+
+- Custom Time type is used to parse time without timezone.
+- Items arrays which include oneOf are replaced with and object.
+- Sandbox and VMStartData definitions were created and replaced in the definition where they are used
+to create types that can be passed around when using the SDK.
