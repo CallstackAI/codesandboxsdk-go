@@ -1,0 +1,6 @@
+package: codesandboxsdk
+output: sdk.gen.go
+generate:
+  client: true
+  models: true
+

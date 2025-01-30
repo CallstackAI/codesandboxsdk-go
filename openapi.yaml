@@ -56,6 +56,79 @@ components:
           type: boolean
       title: Response
       type: object
+    Sandbox:
+      properties:
+        alias:
+          type: string
+        created_at:
+          format: date-time
+          type: string
+          x-go-type: Time
+        description:
+          nullable: true
+          type: string
+        id:
+          type: string
+        is_frozen:
+          type: boolean
+        privacy:
+          type: integer
+        tags:
+          items:
+            type: string
+          type: array
+        title:
+          nullable: true
+          type: string
+        updated_at:
+          format: date-time
+          type: string
+          x-go-type: Time
+      required:
+        - id
+        - privacy
+        - is_frozen
+        - created_at
+        - updated_at
+        - tags
+      type: object
+    VMStartData:
+      properties:
+        bootup_type:
+          type: string
+        cluster:
+          type: string
+        id:
+          type: string
+        latest_pitcher_version:
+          type: string
+        pitcher_manager_version:
+          type: string
+        pitcher_token:
+          type: string
+        pitcher_url:
+          type: string
+        pitcher_version:
+          type: string
+        reconnect_token:
+          type: string
+        user_workspace_path:
+          type: string
+        workspace_path:
+          type: string
+      required:
+        - bootup_type
+        - cluster
+        - id
+        - latest_pitcher_version
+        - pitcher_manager_version
+        - pitcher_token
+        - pitcher_url
+        - pitcher_version
+        - reconnect_token
+        - user_workspace_path
+        - workspace_path
+      type: object
     SandboxCreateRequest:
       properties:
         description:
@@ -249,44 +322,7 @@ components:
                 id:
                   type: string
                 start_response:
-                  description: VM start response. Only present when start_options were provided in the request.
-                  nullable: true
-                  properties:
-                    bootup_type:
-                      type: string
-                    cluster:
-                      type: string
-                    id:
-                      type: string
-                    latest_pitcher_version:
-                      type: string
-                    pitcher_manager_version:
-                      type: string
-                    pitcher_token:
-                      type: string
-                    pitcher_url:
-                      type: string
-                    pitcher_version:
-                      type: string
-                    reconnect_token:
-                      type: string
-                    user_workspace_path:
-                      type: string
-                    workspace_path:
-                      type: string
-                  required:
-                    - bootup_type
-                    - cluster
-                    - id
-                    - latest_pitcher_version
-                    - pitcher_manager_version
-                    - pitcher_token
-                    - pitcher_url
-                    - pitcher_version
-                    - reconnect_token
-                    - user_workspace_path
-                    - workspace_path
-                  type: object
+                  $ref: '#/components/schemas/VMStartData'
                 title:
                   nullable: true
                   type: string
@@ -314,37 +350,7 @@ components:
           type: object
         - properties:
             data:
-              properties:
-                created_at:
-                  format: date-time
-                  type: string
-                description:
-                  nullable: true
-                  type: string
-                id:
-                  type: string
-                is_frozen:
-                  type: boolean
-                privacy:
-                  type: integer
-                tags:
-                  items:
-                    type: string
-                  type: array
-                title:
-                  nullable: true
-                  type: string
-                updated_at:
-                  format: date-time
-                  type: string
-              required:
-                - id
-                - privacy
-                - is_frozen
-                - created_at
-                - updated_at
-                - tags
-              type: object
+              $ref: '#/components/schemas/Sandbox'
           type: object
       title: SandboxGetResponse
     SandboxListResponse:
@@ -365,42 +371,28 @@ components:
         - properties:
             data:
               properties:
+                pagination:
+                  properties:
+                    current_page:
+                      type: integer
+                    next_page:
+                      description: The number of the next page, if any. If `null`, the current page is the last page of records.
+                      nullable: true
+                      type: integer
+                    total_records:
+                      type: integer
+                  required:
+                    - total_records
+                    - current_page
+                    - next_page
+                  type: object
                 sandboxes:
                   items:
-                    properties:
-                      created_at:
-                        format: date-time
-                        type: string
-                      description:
-                        nullable: true
-                        type: string
-                      id:
-                        type: string
-                      is_frozen:
-                        type: boolean
-                      privacy:
-                        type: integer
-                      tags:
-                        items:
-                          type: string
-                        type: array
-                      title:
-                        nullable: true
-                        type: string
-                      updated_at:
-                        format: date-time
-                        type: string
-                    required:
-                      - id
-                      - privacy
-                      - is_frozen
-                      - created_at
-                      - updated_at
-                      - tags
-                    type: object
+                    $ref: '#/components/schemas/Sandbox'
                   type: array
               required:
                 - sandboxes
+                - pagination
               type: object
           type: object
       title: SandboxListResponse
@@ -545,6 +537,73 @@ components:
               type: object
           type: object
       title: TokenUpdateResponse
+    VMCreateSessionRequest:
+      properties:
+        permission:
+          description: Permission level for the session
+          enum:
+            - read
+            - write
+          example: write
+          type: string
+        session_id:
+          description: Unique identifier for the session
+          example: my-session-1
+          pattern: ^[a-zA-Z0-9_-]+$
+          type: string
+      required:
+        - session_id
+        - permission
+      title: VMCreateSessionRequest
+      type: object
+    VMCreateSessionResponse:
+      allOf:
+        - properties:
+            errors:
+              items:
+                oneOf:
+                  - type: string
+                  - additionalProperties: true
+                    type: object
+                title: Error
+              type: array
+            success:
+              type: boolean
+          title: Response
+          type: object
+        - properties:
+            data:
+              properties:
+                capabilities:
+                  description: List of capabilities that Pitcher has
+                  items:
+                    type: string
+                  type: array
+                permissions:
+                  description: The permissions of the current session
+                  type: object
+                pitcher_token:
+                  description: Token to authenticate with Pitcher (the agent running inside the VM)
+                  type: string
+                pitcher_url:
+                  description: WebSocket URL to connect to Pitcher
+                  type: string
+                user_workspace_path:
+                  description: Path to the user's workspace in the VM
+                  type: string
+                username:
+                  description: The Linux username created for this session
+                  type: string
+              required:
+                - username
+                - pitcher_token
+                - user_workspace_path
+                - capabilities
+                - permissions
+                - pitcher_url
+              type: object
+          type: object
+      title: VMCreateSessionResponse
     VMHibernateRequest:
       properties: {}
       title: VMHibernateRequest
@@ -644,42 +703,7 @@ components:
           type: object
         - properties:
             data:
-              properties:
-                bootup_type:
-                  type: string
-                cluster:
-                  type: string
-                id:
-                  type: string
-                latest_pitcher_version:
-                  type: string
-                pitcher_manager_version:
-                  type: string
-                pitcher_token:
-                  type: string
-                pitcher_url:
-                  type: string
-                pitcher_version:
-                  type: string
-                reconnect_token:
-                  type: string
-                user_workspace_path:
-                  type: string
-                workspace_path:
-                  type: string
-              required:
-                - bootup_type
-                - cluster
-                - id
-                - latest_pitcher_version
-                - pitcher_manager_version
-                - pitcher_token
-                - pitcher_url
-                - pitcher_version
-                - reconnect_token
-                - user_workspace_path
-                - workspace_path
-              type: object
+              $ref: '#/components/schemas/VMStartData'
           type: object
       title: VMStartResponse
     VMUpdateHibernationTimeoutRequest:
@@ -876,7 +900,6 @@ paths:
         Create a new API token for a workspace that is part of the current organization.
       operationId: token/create
       parameters: []
-
       requestBody:
         content:
           application/json:
@@ -985,6 +1008,13 @@ paths:
             default: 1
             minimum: 1
             type: integer
+        - description: If true, only returns VMs for which a heartbeat was received in the last 30 seconds.
+          in: query
+          name: status
+          required: false
+          schema:
+            enum:
+              - running
       responses:
         '200':
           content:
@@ -1162,6 +1192,44 @@ paths:
       summary: Update VM Hibernation Timeout
       tags:
         - vm
+  /vm/{id}/sessions:
+    post:
+      callbacks: {}
+      description: |
+        Creates a new session on a running VM. A session represents an isolated Linux user, with their own container.
+        A session has a single use token that the user can use to connect to the VM. This token has specific permissions (currently, read or write).
+        The session is identified by a unique session ID, and the Linux username is based on the session ID.
+
+        This endpoint requires the VM to be running. If the VM is not running, it will return a 404 error.
+      operationId: vm/create_session
+      parameters:
+        - description: Sandbox ID
+          example: new
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VMCreateSessionRequest'
+        description: VM Create Session Request
+        required: false
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VMCreateSessionResponse'
+          description: VM Create Session Response
+      security:
+        - authorization:
+            - vm:manage
+      summary: Create a new session on a VM
+      tags:
+        - vm
   /vm/{id}/shutdown:
     post:
       callbacks: {}
@@ -1319,6 +1387,6 @@ paths:
         - vm
 security: []
 servers:
-  - url: https://api.codesandbox.stream
+  - url: https://api.codesandbox.io
     variables: {}
 tags: []
