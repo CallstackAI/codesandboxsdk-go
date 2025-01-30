@@ -11,11 +11,11 @@ const (
 	APIBaseURL = "https://api.codesandbox.io"
 )
 
-type APIClient struct {
+type SDKClient struct {
 	*ClientWithResponses
 }
 
-func NewSDKClient(baseURL, token string) (*APIClient, error) {
+func NewSDKClient(baseURL, token string) (*SDKClient, error) {
 	httpClient := &http.Client{}
 	bearerAuth, err := securityprovider.NewSecurityProviderBearerToken(token)
 	if err != nil {
@@ -30,5 +30,5 @@ func NewSDKClient(baseURL, token string) (*APIClient, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create codesandbox SDK client: %w", err)
 	}
-	return &APIClient{client}, nil
+	return &SDKClient{client}, nil
 }
