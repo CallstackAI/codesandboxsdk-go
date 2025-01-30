@@ -151,22 +151,7 @@ type SandboxForkRequest struct {
 	Privacy *int `json:"privacy,omitempty"`
 
 	// StartOptions Optional VM start configuration. If provided, the sandbox VM will be started immediately after creation.
-	StartOptions *struct {
-		// HibernationTimeoutSeconds The time in seconds after which the VM will hibernate due to inactivity.
-		// Must be a positive integer between 1 and 86400 (24 hours).
-		// Defaults to 300 seconds (5 minutes) if not specified.
-		HibernationTimeoutSeconds *int `json:"hibernation_timeout_seconds,omitempty"`
-
-		// Ipcountry This determines in which cluster, closest to the given country the VM will be started in. The format is ISO-3166-1 alpha-2. If not set, the VM will be started closest to the caller of this API. This will only be applied when a VM is run for the first time, and will only serve as a hint (e.g. if the template of this sandbox runs in EU cluster, this sandbox will also run in the EU cluster).
-		Ipcountry *string `json:"ipcountry,omitempty"`
-
-		// Tier Determines which specs to start the VM with. If not specified, the VM will start with the default specs for the workspace.
-		//
-		// You can only specify a VM tier when starting a VM that is inside your workspace. Specifying a VM tier for someone else's sandbox will return an error.
-		//
-		// Not all tiers will be available depending on the workspace subscription status, and higher tiers incur higher costs. Please see codesandbox.io/pricing for details on specs and costs.
-		Tier *interface{} `json:"tier,omitempty"`
-	} `json:"start_options,omitempty"`
+	StartOptions *SandboxStartOptions `json:"start_options,omitempty"`
 
 	// Tags Tags to set on the new sandbox, if any. Will not inherit tags from the source sandbox.
 	Tags *[]string `json:"tags,omitempty"`
@@ -241,6 +226,24 @@ type SandboxListResponseErrors1 map[string]interface{}
 // SandboxListResponse_Errors_Item defines model for SandboxListResponse.errors.Item.
 type SandboxListResponse_Errors_Item struct {
 	union json.RawMessage
+}
+
+// SandboxStartOptions Optional VM start configuration. If provided, the sandbox VM will be started immediately after creation.
+type SandboxStartOptions struct {
+	// HibernationTimeoutSeconds The time in seconds after which the VM will hibernate due to inactivity.
+	// Must be a positive integer between 1 and 86400 (24 hours).
+	// Defaults to 300 seconds (5 minutes) if not specified.
+	HibernationTimeoutSeconds *int `json:"hibernation_timeout_seconds,omitempty"`
+
+	// Ipcountry This determines in which cluster, closest to the given country the VM will be started in. The format is ISO-3166-1 alpha-2. If not set, the VM will be started closest to the caller of this API. This will only be applied when a VM is run for the first time, and will only serve as a hint (e.g. if the template of this sandbox runs in EU cluster, this sandbox will also run in the EU cluster).
+	Ipcountry *string `json:"ipcountry,omitempty"`
+
+	// Tier Determines which specs to start the VM with. If not specified, the VM will start with the default specs for the workspace.
+	//
+	// You can only specify a VM tier when starting a VM that is inside your workspace. Specifying a VM tier for someone else's sandbox will return an error.
+	//
+	// Not all tiers will be available depending on the workspace subscription status, and higher tiers incur higher costs. Please see codesandbox.io/pricing for details on specs and costs.
+	Tier *interface{} `json:"tier,omitempty"`
 }
 
 // TokenCreateRequest defines model for TokenCreateRequest.

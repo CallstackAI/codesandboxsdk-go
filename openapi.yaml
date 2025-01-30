@@ -92,6 +92,40 @@ components:
         - updated_at
         - tags
       type: object
+    SandboxStartOptions:
+      description: Optional VM start configuration. If provided, the sandbox VM will be started immediately after creation.
+      properties:
+        hibernation_timeout_seconds:
+          description: |
+            The time in seconds after which the VM will hibernate due to inactivity.
+            Must be a positive integer between 1 and 86400 (24 hours).
+            Defaults to 300 seconds (5 minutes) if not specified.
+          example: 300
+          maximum: 86400
+          minimum: 1
+          type: integer
+        ipcountry:
+          description: This determines in which cluster, closest to the given country the VM will be started in. The format is ISO-3166-1 alpha-2. If not set, the VM will be started closest to the caller of this API. This will only be applied when a VM is run for the first time, and will only serve as a hint (e.g. if the template of this sandbox runs in EU cluster, this sandbox will also run in the EU cluster).
+          example: NL
+          pattern: ^[A-Z]{2}$
+          type: string
+        tier:
+          description: |
+            Determines which specs to start the VM with. If not specified, the VM will start with the default specs for the workspace.
+
+            You can only specify a VM tier when starting a VM that is inside your workspace. Specifying a VM tier for someone else's sandbox will return an error.
+
+            Not all tiers will be available depending on the workspace subscription status, and higher tiers incur higher costs. Please see codesandbox.io/pricing for details on specs and costs.
+          enum:
+            - Pico
+            - Nano
+            - Micro
+            - Small
+            - Medium
+            - Large
+            - XLarge
+          example: Micro
+      type: object
     VMStartData:
       properties:
         bootup_type:
@@ -253,39 +287,7 @@ components:
           description: Sandbox privacy. 0 for public, 1 for unlisted, and 2 for private. Subject to the minimum privacy restrictions of the workspace. Defaults to the privacy of the original sandbox.
           type: integer
         start_options:
-          description: Optional VM start configuration. If provided, the sandbox VM will be started immediately after creation.
-          properties:
-            hibernation_timeout_seconds:
-              description: |
-                The time in seconds after which the VM will hibernate due to inactivity.
-                Must be a positive integer between 1 and 86400 (24 hours).
-                Defaults to 300 seconds (5 minutes) if not specified.
-              example: 300
-              maximum: 86400
-              minimum: 1
-              type: integer
-            ipcountry:
-              description: This determines in which cluster, closest to the given country the VM will be started in. The format is ISO-3166-1 alpha-2. If not set, the VM will be started closest to the caller of this API. This will only be applied when a VM is run for the first time, and will only serve as a hint (e.g. if the template of this sandbox runs in EU cluster, this sandbox will also run in the EU cluster).
-              example: NL
-              pattern: ^[A-Z]{2}$
-              type: string
-            tier:
-              description: |
-                Determines which specs to start the VM with. If not specified, the VM will start with the default specs for the workspace.
-
-                You can only specify a VM tier when starting a VM that is inside your workspace. Specifying a VM tier for someone else's sandbox will return an error.
-
-                Not all tiers will be available depending on the workspace subscription status, and higher tiers incur higher costs. Please see codesandbox.io/pricing for details on specs and costs.
-              enum:
-                - Pico
-                - Nano
-                - Micro
-                - Small
-                - Medium
-                - Large
-                - XLarge
-              example: Micro
-          type: object
+          $ref: "#/components/schemas/SandboxStartOptions"
         tags:
           default: []
           description: Tags to set on the new sandbox, if any. Will not inherit tags from the source sandbox.
