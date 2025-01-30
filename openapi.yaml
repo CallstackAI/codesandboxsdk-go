@@ -56,6 +56,19 @@ components:
           type: boolean
       title: Response
       type: object
+    SandboxFile:
+      properties:
+        binary_content:
+          description: If the file has binary (non plain-text) contents, place the base-64 encoded contents in this key. Should be empty or missing if `is_binary` is `false`.
+          type: string
+        code:
+          description: If the file is non-binary in nature, place the (escaped) plain text contents in this key. Should be empty or missing if `is_binary` is `true`.
+          type: string
+        is_binary:
+          default: false
+          description: Whether the file contains binary contents.
+          type: boolean
+      type: object
     Sandbox:
       properties:
         alias:
@@ -178,18 +191,7 @@ components:
           type: array
         files:
           additionalProperties:
-            properties:
-              binary_content:
-                description: If the file has binary (non plain-text) contents, place the base-64 encoded contents in this key. Should be empty or missing if `is_binary` is `false`.
-                type: string
-              code:
-                description: If the file is non-binary in nature, place the (escaped) plain text contents in this key. Should be empty or missing if `is_binary` is `true`.
-                type: string
-              is_binary:
-                default: false
-                description: Whether the file contains binary contents.
-                type: boolean
-            type: object
+            $ref: "#/components/schemas/SandboxFile"
           description: Map of `path => file` where each file is a map.
           type: object
         is_frozen:

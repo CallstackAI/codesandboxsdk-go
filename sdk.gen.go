@@ -75,16 +75,7 @@ type SandboxCreateRequest struct {
 	ExternalResources *[]string `json:"external_resources,omitempty"`
 
 	// Files Map of `path => file` where each file is a map.
-	Files map[string]struct {
-		// BinaryContent If the file has binary (non plain-text) contents, place the base-64 encoded contents in this key. Should be empty or missing if `is_binary` is `false`.
-		BinaryContent *string `json:"binary_content,omitempty"`
-
-		// Code If the file is non-binary in nature, place the (escaped) plain text contents in this key. Should be empty or missing if `is_binary` is `true`.
-		Code *string `json:"code,omitempty"`
-
-		// IsBinary Whether the file contains binary contents.
-		IsBinary *bool `json:"is_binary,omitempty"`
-	} `json:"files"`
+	Files map[string]SandboxFile `json:"files"`
 
 	// IsFrozen Whether changes to the sandbox are disallowed. Defaults to `false`.
 	IsFrozen *bool `json:"is_frozen,omitempty"`
@@ -134,6 +125,18 @@ type SandboxCreateResponseErrors1 map[string]interface{}
 // SandboxCreateResponse_Errors_Item defines model for SandboxCreateResponse.errors.Item.
 type SandboxCreateResponse_Errors_Item struct {
 	union json.RawMessage
+}
+
+// SandboxFile defines model for SandboxFile.
+type SandboxFile struct {
+	// BinaryContent If the file has binary (non plain-text) contents, place the base-64 encoded contents in this key. Should be empty or missing if `is_binary` is `false`.
+	BinaryContent *string `json:"binary_content,omitempty"`
+
+	// Code If the file is non-binary in nature, place the (escaped) plain text contents in this key. Should be empty or missing if `is_binary` is `true`.
+	Code *string `json:"code,omitempty"`
+
+	// IsBinary Whether the file contains binary contents.
+	IsBinary *bool `json:"is_binary,omitempty"`
 }
 
 // SandboxForkRequest defines model for SandboxForkRequest.
