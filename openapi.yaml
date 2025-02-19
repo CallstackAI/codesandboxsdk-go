@@ -1,12 +1,315 @@
 components:
   responses: {}
   schemas:
+    Response:
+      properties:
+        errors:
+          items:
+            oneOf:
+              - type: string
+              - additionalProperties: true
+                type: object
+            title: Error
+          type: array
+        success:
+          type: boolean
+      title: Response
+      type: object
+    PreviewTokenListResponse:
+      allOf:
+        - properties:
+            errors:
+              items:
+                oneOf:
+                  - type: string
+                  - additionalProperties: true
+                    type: object
+                title: Error
+              type: array
+            success:
+              type: boolean
+          title: Response
+          type: object
+        - properties:
+            data:
+              properties:
+                sandbox_id:
+                  type: string
+                tokens:
+                  items:
+                    $ref: '#/components/schemas/PreviewToken'
+                  type: array
+              required:
+                - tokens
+                - sandbox_id
+              type: object
+          type: object
+      title: PreviewTokenListResponse
+      type: object
+    VMUpdateHibernationTimeoutRequest:
+      properties:
+        hibernation_timeout_seconds:
+          description: |
+            The new hibernation timeout in seconds.
+
+            Must be greater than 0 and less than or equal to 86400 (24 hours).
+          example: 300
+          maximum: 86400
+          minimum: 1
+          type: integer
+      required:
+        - hibernation_timeout_seconds
+      title: VMUpdateHibernationTimeoutRequest
+      type: object
+    PreviewToken:
+      properties:
+        expires_at:
+          nullable: true
+          type: string
+        last_used_at:
+          nullable: true
+          type: string
+        token_id:
+          type: string
+        token_prefix:
+          type: string
+      required:
+        - expires_at
+        - last_used_at
+        - token_id
+        - token_prefix
+      title: PreviewToken
+      type: object
+    VMShutdownResponse:
+      allOf:
+        - properties:
+            errors:
+              items:
+                oneOf:
+                  - type: string
+                  - additionalProperties: true
+                    type: object
+                title: Error
+              type: array
+            success:
+              type: boolean
+          title: Response
+          type: object
+        - properties:
+            data:
+              properties: {}
+              type: object
+          type: object
+      title: VMShutdownResponse
+      type: object
+    PreviewTokenRevokeAllResponse:
+      allOf:
+        - properties:
+            errors:
+              items:
+                oneOf:
+                  - type: string
+                  - additionalProperties: true
+                    type: object
+                title: Error
+              type: array
+            success:
+              type: boolean
+          title: Response
+          type: object
+        - properties:
+            data:
+              properties: {}
+              type: object
+          type: object
+      title: PreviewTokenRevokeAllResponse
+      type: object
+    Sandbox:
+      properties:
+        created_at:
+          format: date-time
+          type: string
+          x-go-type: Time
+        description:
+          nullable: true
+          type: string
+        id:
+          type: string
+        is_frozen:
+          type: boolean
+        privacy:
+          type: integer
+        tags:
+          items:
+            type: string
+          type: array
+        title:
+          nullable: true
+          type: string
+        updated_at:
+          format: date-time
+          type: string
+          x-go-type: Time
+      required:
+        - id
+        - privacy
+        - is_frozen
+        - created_at
+        - updated_at
+        - tags
+      title: Sandbox
+      type: object
+    SandboxStartOptions:
+      description: Optional VM start configuration. If provided, the sandbox VM will be started immediately after creation.
+      properties:
+        hibernation_timeout_seconds:
+          description: |
+            The time in seconds after which the VM will hibernate due to inactivity.
+            Must be a positive integer between 1 and 86400 (24 hours).
+            Defaults to 300 seconds (5 minutes) if not specified.
+          example: 300
+          maximum: 86400
+          minimum: 1
+          type: integer
+        ipcountry:
+          description: This determines in which cluster, closest to the given country the VM will be started in. The format is ISO-3166-1 alpha-2. If not set, the VM will be started closest to the caller of this API. This will only be applied when a VM is run for the first time, and will only serve as a hint (e.g. if the template of this sandbox runs in EU cluster, this sandbox will also run in the EU cluster).
+          example: NL
+          pattern: ^[A-Z]{2}$
+          type: string
+        tier:
+          description: |
+            Determines which specs to start the VM with. If not specified, the VM will start with the default specs for the workspace.
+
+            You can only specify a VM tier when starting a VM that is inside your workspace. Specifying a VM tier for someone else's sandbox will return an error.
+
+            Not all tiers will be available depending on the workspace subscription status, and higher tiers incur higher costs. Please see codesandbox.io/pricing for details on specs and costs.
+          enum:
+            - Pico
+            - Nano
+            - Micro
+            - Small
+            - Medium
+            - Large
+            - XLarge
+          example: Micro
+      type: object
     Error:
       oneOf:
         - type: string
         - additionalProperties: true
           type: object
       title: Error
+    VMHibernateRequest:
+      properties: {}
+      title: VMHibernateRequest
+    PreviewTokenCreateRequest:
+      properties:
+        expires_at:
+          description: UTC Timestamp until when this token is valid. Omitting this field will create a token without an expiry.
+          format: date-time
+          nullable: true
+          type: string
+      title: PreviewTokenCreateRequest
+      type: object
+    SandboxGetResponse:
+      allOf:
+        - properties:
+            errors:
+              items:
+                oneOf:
+                  - type: string
+                  - additionalProperties: true
+                    type: object
+                title: Error
+              type: array
+            success:
+              type: boolean
+          title: Response
+          type: object
+        - properties:
+            data:
+              $ref: '#/components/schemas/Sandbox'
+          type: object
+      title: SandboxGetResponse
+      type: object
+    SandboxForkRequest:
+      properties:
+        description:
+          default: '[Original description]'
+          description: Sandbox description. Maximum 255 characters. Defaults to description of original sandbox.
+          maxLength: 255
+          type: string
+        is_frozen:
+          default: false
+          description: Sandbox frozen status. When true, edits to the sandbox are restricted. Defaults to frozen status of the original sandbox.
+          type: boolean
+        path:
+          default: /
+          description: Path to the collection where the new sandbox should be stored. Defaults to "/". If no collection exists at the given path, it will be created.
+          type: string
+        privacy:
+          default: 0
+          description: Sandbox privacy. 0 for public, 1 for unlisted, and 2 for private. Subject to the minimum privacy restrictions of the workspace. Defaults to the privacy of the original sandbox.
+          type: integer
+        start_options:
+          $ref: "#/components/schemas/SandboxStartOptions"
+        tags:
+          default: []
+          description: Tags to set on the new sandbox, if any. Will not inherit tags from the source sandbox.
+          items:
+            type: string
+          type: array
+        title:
+          default: '[Original title]'
+          description: Sandbox title. Maximum 255 characters. Defaults to title of original sandbox with (forked).
+          maxLength: 255
+          type: string
+      title: SandboxForkRequest
+      type: object
+    SandboxListResponse:
+      allOf:
+        - properties:
+            errors:
+              items:
+                oneOf:
+                  - type: string
+                  - additionalProperties: true
+                    type: object
+                title: Error
+              type: array
+            success:
+              type: boolean
+          title: Response
+          type: object
+        - properties:
+            data:
+              properties:
+                pagination:
+                  properties:
+                    current_page:
+                      type: integer
+                    next_page:
+                      description: The number of the next page, if any. If `null`, the current page is the last page of records.
+                      nullable: true
+                      type: integer
+                    total_records:
+                      type: integer
+                  required:
+                    - total_records
+                    - current_page
+                    - next_page
+                  type: object
+                sandboxes:
+                  items:
+                    $ref: '#/components/schemas/Sandbox'
+                  type: array
+              required:
+                - sandboxes
+                - pagination
+              type: object
+          type: object
+      title: SandboxListResponse
+      type: object
     MetaInformation:
       properties:
         api:
@@ -42,71 +345,120 @@ components:
         - api
       title: MetaInformation
       type: object
-    Response:
+    TokenUpdateRequest:
+      description: Updateable fields for API Tokens. Omitting a field will not update it; explicitly passing null or an empty list will clear the value.
       properties:
-        errors:
-          items:
-            oneOf:
-              - type: string
-              - additionalProperties: true
-                type: object
-            title: Error
-          type: array
-        success:
-          type: boolean
-      title: Response
-      type: object
-    SandboxFile:
-      properties:
-        binary_content:
-          description: If the file has binary (non plain-text) contents, place the base-64 encoded contents in this key. Should be empty or missing if `is_binary` is `false`.
+        default_version:
+          description: API Version to use, formatted as YYYY-MM-DD
+          format: date
+          nullable: true
           type: string
-        code:
-          description: If the file is non-binary in nature, place the (escaped) plain text contents in this key. Should be empty or missing if `is_binary` is `true`.
-          type: string
-        is_binary:
-          default: false
-          description: Whether the file contains binary contents.
-          type: boolean
-      type: object
-    Sandbox:
-      properties:
-        alias:
-          type: string
-        created_at:
-          format: date-time
-          type: string
-          x-go-type: Time
         description:
+          description: Description of this token, for instance where it will be used.
+          maxLength: 255
           nullable: true
           type: string
-        id:
-          type: string
-        is_frozen:
-          type: boolean
-        privacy:
-          type: integer
-        tags:
-          items:
-            type: string
-          type: array
-        title:
-          nullable: true
-          type: string
-        updated_at:
+        expires_at:
+          description: Expiry time of this token. Cannot be set in the past, and cannot be changed for tokens that have already expired. Pass null to make this token never expire.
           format: date-time
+          nullable: true
           type: string
-          x-go-type: Time
-      required:
-        - id
-        - privacy
-        - is_frozen
-        - created_at
-        - updated_at
-        - tags
+        scopes:
+          description: Which scopes to grant this token. The given scopes will replace the current scopes, revoking any that are no longer present in the list.
+          items:
+            enum:
+              - sandbox_create
+              - sandbox_edit_code
+              - sandbox_read
+              - vm_manage
+          type: array
+      title: TokenUpdateRequest
       type: object
-    SandboxStartOptions:
-      description: Optional VM start configuration. If provided, the sandbox VM will be started immediately after creation.
+    VMHibernateResponse:
+      allOf:
+        - properties:
+            errors:
+              items:
+                oneOf:
+                  - type: string
+                  - additionalProperties: true
+                    type: object
+                title: Error
+              type: array
+            success:
+              type: boolean
+          title: Response
+          type: object
+        - properties:
+            data:
+              properties: {}
+              type: object
+          type: object
+      title: VMHibernateResponse
+      type: object
+    PreviewTokenUpdateResponse:
+      allOf:
+        - properties:
+            errors:
+              items:
+                oneOf:
+                  - type: string
+                  - additionalProperties: true
+                    type: object
+                title: Error
+              type: array
+            success:
+              type: boolean
+          title: Response
+          type: object
+        - properties:
+            data:
+              properties:
+                sandbox_id:
+                  type: string
+                token:
+                  $ref: '#/components/schemas/PreviewToken'
+              required:
+                - sandbox_id
+                - token
+              type: object
+          type: object
+      title: PreviewTokenUpdateResponse
+      type: object
+    SandboxCreateResponse:
+      allOf:
+        - properties:
+            errors:
+              items:
+                oneOf:
+                  - type: string
+                  - additionalProperties: true
+                    type: object
+                title: Error
+              type: array
+            success:
+              type: boolean
+          title: Response
+          type: object
+        - properties:
+            data:
+              properties:
+                alias:
+                  type: string
+                id:
+                  type: string
+                title:
+                  nullable: true
+                  type: string
+              required:
+                - alias
+                - id
+                - title
+              type: object
+          type: object
+      title: SandboxCreateResponse
+      type: object
+    VMStartRequest:
       properties:
         hibernation_timeout_seconds:
           description: |
@@ -138,6 +490,49 @@ components:
             - Large
             - XLarge
           example: Micro
+      title: VMStartRequest
+      type: object
+    PreviewTokenUpdateRequest:
+      properties:
+        expires_at:
+          description: UTC Timestamp until when this token is valid. Omitting this field will create a token without an expiry.
+          format: date-time
+          nullable: true
+          type: string
+      title: PreviewTokenUpdateRequest
+      type: object
+    VMShutdownRequest:
+      properties: {}
+      title: VMShutdownRequest
+    VMUpdateSpecsRequest:
+      properties:
+        tier:
+          description: |
+            Determines which specs to update the VM with.
+
+            Not all tiers will be available depending on the workspace subscription status, and higher tiers incur higher costs. Please see codesandbox.io/pricing for details on specs and costs.
+          enum:
+            - Pico
+            - Nano
+            - Micro
+            - Small
+            - Medium
+            - Large
+            - XLarge
+          example: Micro
+      required:
+        - tier
+      title: VMUpdateSpecsRequest
+      type: object
+    WorkspaceCreateRequest:
+      properties:
+        name:
+          description: Name for the new workspace. Maximum length 64 characters.
+          maxLength: 64
+          type: string
+      required:
+        - name
+      title: WorkspaceCreateRequest
       type: object
     VMStartData:
       properties:
@@ -176,6 +571,56 @@ components:
         - user_workspace_path
         - workspace_path
       type: object
+    VMStartResponse:
+      allOf:
+        - properties:
+            errors:
+              items:
+                oneOf:
+                  - type: string
+                  - additionalProperties: true
+                    type: object
+                title: Error
+              type: array
+            success:
+              type: boolean
+          title: Response
+          type: object
+        - properties:
+            data:
+              $ref: '#/components/schemas/VMStartData'
+          type: object
+      title: VMStartResponse
+      type: object
+    VMUpdateSpecsResponse:
+      allOf:
+        - properties:
+            errors:
+              items:
+                oneOf:
+                  - type: string
+                  - additionalProperties: true
+                    type: object
+                title: Error
+              type: array
+            success:
+              type: boolean
+          title: Response
+          type: object
+        - properties:
+            data:
+              properties:
+                id:
+                  type: string
+                tier:
+                  type: string
+              required:
+                - id
+                - tier
+              type: object
+          type: object
+      title: VMUpdateSpecsResponse
+      type: object
     SandboxCreateRequest:
       properties:
         description:
@@ -191,7 +636,18 @@ components:
           type: array
         files:
           additionalProperties:
-            $ref: "#/components/schemas/SandboxFile"
+            properties:
+              binary_content:
+                description: If the file has binary (non plain-text) contents, place the base-64 encoded contents in this key. Should be empty or missing if `is_binary` is `false`.
+                type: string
+              code:
+                description: If the file is non-binary in nature, place the (escaped) plain text contents in this key. Should be empty or missing if `is_binary` is `true`.
+                type: string
+              is_binary:
+                default: false
+                description: Whether the file contains binary contents.
+                type: boolean
+            type: object
           description: Map of `path => file` where each file is a map.
           type: object
         is_frozen:
@@ -237,7 +693,7 @@ components:
       required:
         - files
       title: SandboxCreateRequest
-    SandboxCreateResponse:
+    TokenUpdateResponse:
       allOf:
         - properties:
             errors:
@@ -255,177 +711,29 @@ components:
         - properties:
             data:
               properties:
-                alias:
-                  type: string
-                id:
-                  type: string
-                title:
+                description:
                   nullable: true
                   type: string
-              required:
-                - alias
-                - id
-                - title
-              type: object
-          type: object
-      title: SandboxCreateResponse
-    SandboxForkRequest:
-      properties:
-        description:
-          default: '[Original description]'
-          description: Sandbox description. Maximum 255 characters. Defaults to description of original sandbox.
-          maxLength: 255
-          type: string
-        is_frozen:
-          default: false
-          description: Sandbox frozen status. When true, edits to the sandbox are restricted. Defaults to frozen status of the original sandbox.
-          type: boolean
-        path:
-          default: /
-          description: Path to the collection where the new sandbox should be stored. Defaults to "/". If no collection exists at the given path, it will be created.
-          type: string
-        privacy:
-          default: 0
-          description: Sandbox privacy. 0 for public, 1 for unlisted, and 2 for private. Subject to the minimum privacy restrictions of the workspace. Defaults to the privacy of the original sandbox.
-          type: integer
-        start_options:
-          $ref: "#/components/schemas/SandboxStartOptions"
-        tags:
-          default: []
-          description: Tags to set on the new sandbox, if any. Will not inherit tags from the source sandbox.
-          items:
-            type: string
-          type: array
-        title:
-          default: '[Original title]'
-          description: Sandbox title. Maximum 255 characters. Defaults to title of original sandbox with (forked).
-          maxLength: 255
-          type: string
-      title: SandboxForkRequest
-      type: object
-    SandboxForkResponse:
-      allOf:
-        - properties:
-            errors:
-              items:
-                oneOf:
-                  - type: string
-                  - additionalProperties: true
-                    type: object
-                title: Error
-              type: array
-            success:
-              type: boolean
-          title: Response
-          type: object
-        - properties:
-            data:
-              properties:
-                alias:
-                  type: string
-                id:
-                  type: string
-                start_response:
-                  $ref: '#/components/schemas/VMStartData'
-                title:
+                expires_at:
+                  format: date-time
                   nullable: true
                   type: string
-              required:
-                - alias
-                - id
-                - title
-              type: object
-          type: object
-      title: SandboxForkResponse
-    SandboxGetResponse:
-      allOf:
-        - properties:
-            errors:
-              items:
-                oneOf:
-                  - type: string
-                  - additionalProperties: true
-                    type: object
-                title: Error
-              type: array
-            success:
-              type: boolean
-          title: Response
-          type: object
-        - properties:
-            data:
-              $ref: '#/components/schemas/Sandbox'
-          type: object
-      title: SandboxGetResponse
-    SandboxListResponse:
-      allOf:
-        - properties:
-            errors:
-              items:
-                oneOf:
-                  - type: string
-                  - additionalProperties: true
-                    type: object
-                title: Error
-              type: array
-            success:
-              type: boolean
-          title: Response
-          type: object
-        - properties:
-            data:
-              properties:
-                pagination:
-                  properties:
-                    current_page:
-                      type: integer
-                    next_page:
-                      description: The number of the next page, if any. If `null`, the current page is the last page of records.
-                      nullable: true
-                      type: integer
-                    total_records:
-                      type: integer
-                  required:
-                    - total_records
-                    - current_page
-                    - next_page
-                  type: object
-                sandboxes:
+                scopes:
                   items:
-                    $ref: '#/components/schemas/Sandbox'
+                    type: string
                   type: array
+                team_id:
+                  type: string
+                token_id:
+                  type: string
               required:
-                - sandboxes
-                - pagination
+                - description
+                - scopes
+                - team_id
+                - token_id
               type: object
           type: object
-      title: SandboxListResponse
-    TokenCreateRequest:
-      properties:
-        default_version:
-          description: API Version to use, formatted as YYYY-MM-DD. Defaults to the latest version at time of creation.
-          format: date
-          nullable: true
-          type: string
-        description:
-          description: Description of this token, for instance where it will be used.
-          maxLength: 255
-          type: string
-        expires_at:
-          description: UTC Timestamp until when this token is valid. Omitting this field will create a token without an expiry.
-          format: date-time
-          nullable: true
-          type: string
-        scopes:
-          description: Which scopes to grant this token. The given scopes will replace the current scopes, revoking any that are no longer present in the list.
-          items:
-            enum:
-              - sandbox_create
-              - sandbox_edit_code
-              - sandbox_read
-              - vm_manage
-          type: array
-      title: TokenCreateRequest
+      title: TokenUpdateResponse
       type: object
     TokenCreateResponse:
       allOf:
@@ -471,21 +779,20 @@ components:
               type: object
           type: object
       title: TokenCreateResponse
-    TokenUpdateRequest:
-      description: Updateable fields for API Tokens. Omitting a field will not update it; explicitly passing null or an empty list will clear the value.
+      type: object
+    TokenCreateRequest:
       properties:
         default_version:
-          description: API Version to use, formatted as YYYY-MM-DD
+          description: API Version to use, formatted as YYYY-MM-DD. Defaults to the latest version at time of creation.
           format: date
           nullable: true
           type: string
         description:
           description: Description of this token, for instance where it will be used.
           maxLength: 255
-          nullable: true
           type: string
         expires_at:
-          description: Expiry time of this token. Cannot be set in the past, and cannot be changed for tokens that have already expired. Pass null to make this token never expire.
+          description: UTC Timestamp until when this token is valid. Omitting this field will create a token without an expiry.
           format: date-time
           nullable: true
           type: string
@@ -498,49 +805,8 @@ components:
               - sandbox_read
               - vm_manage
           type: array
-      title: TokenUpdateRequest
+      title: TokenCreateRequest
       type: object
-    TokenUpdateResponse:
-      allOf:
-        - properties:
-            errors:
-              items:
-                oneOf:
-                  - type: string
-                  - additionalProperties: true
-                    type: object
-                title: Error
-              type: array
-            success:
-              type: boolean
-          title: Response
-          type: object
-        - properties:
-            data:
-              properties:
-                description:
-                  nullable: true
-                  type: string
-                expires_at:
-                  format: date-time
-                  nullable: true
-                  type: string
-                scopes:
-                  items:
-                    type: string
-                  type: array
-                team_id:
-                  type: string
-                token_id:
-                  type: string
-              required:
-                - description
-                - scopes
-                - team_id
-                - token_id
-              type: object
-          type: object
-      title: TokenUpdateResponse
     VMCreateSessionRequest:
       properties:
         permission:
@@ -608,208 +874,6 @@ components:
               type: object
           type: object
       title: VMCreateSessionResponse
-    VMHibernateRequest:
-      properties: {}
-      title: VMHibernateRequest
-    VMHibernateResponse:
-      allOf:
-        - properties:
-            errors:
-              items:
-                oneOf:
-                  - type: string
-                  - additionalProperties: true
-                    type: object
-                title: Error
-              type: array
-            success:
-              type: boolean
-          title: Response
-          type: object
-        - properties:
-            data:
-              properties: {}
-              type: object
-          type: object
-      title: VMHibernateResponse
-    VMShutdownRequest:
-      properties: {}
-      title: VMShutdownRequest
-    VMShutdownResponse:
-      allOf:
-        - properties:
-            errors:
-              items:
-                oneOf:
-                  - type: string
-                  - additionalProperties: true
-                    type: object
-                title: Error
-              type: array
-            success:
-              type: boolean
-          title: Response
-          type: object
-        - properties:
-            data:
-              properties: {}
-              type: object
-          type: object
-      title: VMShutdownResponse
-    VMStartRequest:
-      properties:
-        hibernation_timeout_seconds:
-          description: |
-            The time in seconds after which the VM will hibernate due to inactivity.
-            Must be a positive integer between 1 and 86400 (24 hours).
-            Defaults to 300 seconds (5 minutes) if not specified.
-          example: 300
-          maximum: 86400
-          minimum: 1
-          type: integer
-        ipcountry:
-          description: This determines in which cluster, closest to the given country the VM will be started in. The format is ISO-3166-1 alpha-2. If not set, the VM will be started closest to the caller of this API. This will only be applied when a VM is run for the first time, and will only serve as a hint (e.g. if the template of this sandbox runs in EU cluster, this sandbox will also run in the EU cluster).
-          example: NL
-          pattern: ^[A-Z]{2}$
-          type: string
-        tier:
-          description: |
-            Determines which specs to start the VM with. If not specified, the VM will start with the default specs for the workspace.
-
-            You can only specify a VM tier when starting a VM that is inside your workspace. Specifying a VM tier for someone else's sandbox will return an error.
-
-            Not all tiers will be available depending on the workspace subscription status, and higher tiers incur higher costs. Please see codesandbox.io/pricing for details on specs and costs.
-          enum:
-            - Pico
-            - Nano
-            - Micro
-            - Small
-            - Medium
-            - Large
-            - XLarge
-          example: Micro
-      title: VMStartRequest
-      type: object
-    VMStartResponse:
-      allOf:
-        - properties:
-            errors:
-              items:
-                oneOf:
-                  - type: string
-                  - additionalProperties: true
-                    type: object
-                title: Error
-              type: array
-            success:
-              type: boolean
-          title: Response
-          type: object
-        - properties:
-            data:
-              $ref: '#/components/schemas/VMStartData'
-          type: object
-      title: VMStartResponse
-    VMUpdateHibernationTimeoutRequest:
-      properties:
-        hibernation_timeout_seconds:
-          description: |
-            The new hibernation timeout in seconds.
-
-            Must be greater than 0 and less than or equal to 86400 (24 hours).
-          example: 300
-          maximum: 86400
-          minimum: 1
-          type: integer
-      required:
-        - hibernation_timeout_seconds
-      title: VMUpdateHibernationTimeoutRequest
-      type: object
-    VMUpdateHibernationTimeoutResponse:
-      allOf:
-        - properties:
-            errors:
-              items:
-                oneOf:
-                  - type: string
-                  - additionalProperties: true
-                    type: object
-                title: Error
-              type: array
-            success:
-              type: boolean
-          title: Response
-          type: object
-        - properties:
-            data:
-              properties:
-                hibernation_timeout_seconds:
-                  type: integer
-                id:
-                  type: string
-              required:
-                - id
-                - hibernation_timeout_seconds
-              type: object
-          type: object
-      title: VMUpdateHibernationTimeoutResponse
-    VMUpdateSpecsRequest:
-      properties:
-        tier:
-          description: |
-            Determines which specs to update the VM with.
-
-            Not all tiers will be available depending on the workspace subscription status, and higher tiers incur higher costs. Please see codesandbox.io/pricing for details on specs and costs.
-          enum:
-            - Pico
-            - Nano
-            - Micro
-            - Small
-            - Medium
-            - Large
-            - XLarge
-          example: Micro
-      required:
-        - tier
-      title: VMUpdateSpecsRequest
-      type: object
-    VMUpdateSpecsResponse:
-      allOf:
-        - properties:
-            errors:
-              items:
-                oneOf:
-                  - type: string
-                  - additionalProperties: true
-                    type: object
-                title: Error
-              type: array
-            success:
-              type: boolean
-          title: Response
-          type: object
-        - properties:
-            data:
-              properties:
-                id:
-                  type: string
-                tier:
-                  type: string
-              required:
-                - id
-                - tier
-              type: object
-          type: object
-      title: VMUpdateSpecsResponse
-    WorkspaceCreateRequest:
-      properties:
-        name:
-          description: Name for the new workspace. Maximum length 64 characters.
-          maxLength: 64
-          type: string
-      required:
-        - name
-      title: WorkspaceCreateRequest
       type: object
     WorkspaceCreateResponse:
       allOf:
@@ -839,6 +903,125 @@ components:
               type: object
           type: object
       title: WorkspaceCreateResponse
+      type: object
+    VMUpdateHibernationTimeoutResponse:
+      allOf:
+        - properties:
+            errors:
+              items:
+                oneOf:
+                  - type: string
+                  - additionalProperties: true
+                    type: object
+                title: Error
+              type: array
+            success:
+              type: boolean
+          title: Response
+          type: object
+        - properties:
+            data:
+              properties:
+                hibernation_timeout_seconds:
+                  type: integer
+                id:
+                  type: string
+              required:
+                - id
+                - hibernation_timeout_seconds
+              type: object
+          type: object
+      title: VMUpdateHibernationTimeoutResponse
+      type: object
+    SandboxForkResponse:
+      allOf:
+        - properties:
+            errors:
+              items:
+                oneOf:
+                  - type: string
+                  - additionalProperties: true
+                    type: object
+                title: Error
+              type: array
+            success:
+              type: boolean
+          title: Response
+          type: object
+        - properties:
+            data:
+              properties:
+                alias:
+                  type: string
+                id:
+                  type: string
+                start_response:
+                  $ref: '#/components/schemas/VMStartData'
+                title:
+                  nullable: true
+                  type: string
+              required:
+                - alias
+                - id
+                - title
+              type: object
+          type: object
+      title: SandboxForkResponse
+      type: object
+    PreviewTokenCreateResponse:
+      allOf:
+        - properties:
+            errors:
+              items:
+                oneOf:
+                  - type: string
+                  - additionalProperties: true
+                    type: object
+                title: Error
+              type: array
+            success:
+              type: boolean
+          title: Response
+          type: object
+        - properties:
+            data:
+              properties:
+                sandbox_id:
+                  type: string
+                token:
+                  allOf:
+                    - properties:
+                        expires_at:
+                          nullable: true
+                          type: string
+                        last_used_at:
+                          nullable: true
+                          type: string
+                        token_id:
+                          type: string
+                        token_prefix:
+                          type: string
+                      required:
+                        - expires_at
+                        - last_used_at
+                        - token_id
+                        - token_prefix
+                      title: PreviewToken
+                      type: object
+                    - properties:
+                        token:
+                          type: string
+                      required:
+                        - token
+                      type: object
+                  type: object
+              required:
+                - sandbox_id
+                - token
+              type: object
+          type: object
+      title: PreviewTokenCreateResponse
+      type: object
   securitySchemes:
     authorization:
       scheme: bearer
@@ -892,18 +1075,19 @@ paths:
       summary: Create a Workspace
       tags: []
   /org/workspace/{team_id}/tokens:
-    parameters:
-      - name: team_id
-        in: path
-        required: true
-        schema:
-          type: string
     post:
       callbacks: {}
       description: |
         Create a new API token for a workspace that is part of the current organization.
       operationId: token/create
-      parameters: []
+      parameters:
+        - description: ID of the workspace to create the token in
+          example: ws_123abcdef
+          in: path
+          name: team_id
+          required: true
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -924,23 +1108,26 @@ paths:
       summary: Create an API Token
       tags: []
   /org/workspace/{team_id}/tokens/{token_id}:
-    parameters:
-      - name: team_id
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: token_id
-        in: path
-        required: true
-        schema:
-          type: string
     patch:
       callbacks: {}
       description: |
         Update an API token for a workspace that is part of the current organization.
       operationId: token/update
-      parameters: []
+      parameters:
+        - description: ID of the workspace the token belongs to
+          example: ws_123abcdef
+          in: path
+          name: team_id
+          required: true
+          schema:
+            type: string
+        - description: ID of token to update
+          example: tok_123abcdef
+          in: path
+          name: token_id
+          required: true
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -1119,6 +1306,129 @@ paths:
       summary: Fork a Sandbox
       tags:
         - sandbox
+  /sandbox/{id}/tokens:
+    delete:
+      callbacks: {}
+      description: |
+        Immediately expires all active preview tokens associated with this sandbox
+      operationId: preview_token/revoke_all
+      parameters:
+        - description: Shortid of the sandbox to revoke tokens for
+          example: 1ab3c
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewTokenRevokeAllResponse'
+          description: RevokeALlPreviewTokensResponse
+      security:
+        - authorization:
+            - preview_token:manage
+      summary: Revoke preview tokens
+      tags: []
+    get:
+      callbacks: {}
+      description: |
+        List information about the preview tokens associated with the current sandbox
+      operationId: preview_token/list
+      parameters:
+        - description: Shortid of the sandbox to list the tokens for
+          example: 1ab3c
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewTokenListResponse'
+          description: Token List Response
+      security:
+        - authorization:
+            - preview_token:manage
+      summary: List Preview Tokens
+      tags: []
+    post:
+      callbacks: {}
+      description: |
+        Create a new Preview token that allow access to a private sandbox
+      operationId: preview_token/create
+      parameters:
+        - description: Shortid of the sandbox to create the token for
+          example: 1ab3c
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreviewTokenCreateRequest'
+        description: Token Create Request
+        required: false
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewTokenCreateResponse'
+          description: Token Create Response
+      security:
+        - authorization:
+            - preview_token:manage
+      summary: Create a Preview Token
+      tags: []
+  /sandbox/{id}/tokens/{token_id}:
+    patch:
+      callbacks: {}
+      description: |
+        Update a Preview token that allow access to a private sandbox
+      operationId: preview_token/update
+      parameters:
+        - description: Shortid of the sandbox to create the token for
+          example: 1ab3c
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - description: ID of the token to update. Does not accept the token itself.
+          example: prv_abcd12345
+          in: path
+          name: token_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreviewTokenUpdateRequest'
+        description: Token Update Request
+        required: false
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewTokenUpdateResponse'
+          description: Token Update Response
+      security:
+        - authorization:
+            - preview_token:manage
+      summary: Update a Preview Token
+      tags: []
   /vm/{id}/hibernate:
     post:
       callbacks: {}
@@ -1391,6 +1701,6 @@ paths:
         - vm
 security: []
 servers:
-  - url: https://api.codesandbox.io
+  - url: https://api.codesandbox.stream
     variables: {}
 tags: []

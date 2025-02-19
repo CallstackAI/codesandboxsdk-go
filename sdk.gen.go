@@ -50,9 +50,115 @@ type MetaInformation struct {
 	} `json:"auth,omitempty"`
 }
 
+// PreviewToken defines model for PreviewToken.
+type PreviewToken struct {
+	ExpiresAt   *string `json:"expires_at"`
+	LastUsedAt  *string `json:"last_used_at"`
+	TokenId     string  `json:"token_id"`
+	TokenPrefix string  `json:"token_prefix"`
+}
+
+// PreviewTokenCreateRequest defines model for PreviewTokenCreateRequest.
+type PreviewTokenCreateRequest struct {
+	// ExpiresAt UTC Timestamp until when this token is valid. Omitting this field will create a token without an expiry.
+	ExpiresAt *time.Time `json:"expires_at"`
+}
+
+// PreviewTokenCreateResponse defines model for PreviewTokenCreateResponse.
+type PreviewTokenCreateResponse struct {
+	Data *struct {
+		SandboxId string `json:"sandbox_id"`
+		Token     struct {
+			ExpiresAt   *string `json:"expires_at"`
+			LastUsedAt  *string `json:"last_used_at"`
+			Token       string  `json:"token"`
+			TokenId     string  `json:"token_id"`
+			TokenPrefix string  `json:"token_prefix"`
+		} `json:"token"`
+	} `json:"data,omitempty"`
+	Errors  *[]PreviewTokenCreateResponse_Errors_Item `json:"errors,omitempty"`
+	Success *bool                                     `json:"success,omitempty"`
+}
+
+// PreviewTokenCreateResponseErrors0 defines model for .
+type PreviewTokenCreateResponseErrors0 = string
+
+// PreviewTokenCreateResponseErrors1 defines model for .
+type PreviewTokenCreateResponseErrors1 map[string]interface{}
+
+// PreviewTokenCreateResponse_Errors_Item defines model for PreviewTokenCreateResponse.errors.Item.
+type PreviewTokenCreateResponse_Errors_Item struct {
+	union json.RawMessage
+}
+
+// PreviewTokenListResponse defines model for PreviewTokenListResponse.
+type PreviewTokenListResponse struct {
+	Data *struct {
+		SandboxId string         `json:"sandbox_id"`
+		Tokens    []PreviewToken `json:"tokens"`
+	} `json:"data,omitempty"`
+	Errors  *[]PreviewTokenListResponse_Errors_Item `json:"errors,omitempty"`
+	Success *bool                                   `json:"success,omitempty"`
+}
+
+// PreviewTokenListResponseErrors0 defines model for .
+type PreviewTokenListResponseErrors0 = string
+
+// PreviewTokenListResponseErrors1 defines model for .
+type PreviewTokenListResponseErrors1 map[string]interface{}
+
+// PreviewTokenListResponse_Errors_Item defines model for PreviewTokenListResponse.errors.Item.
+type PreviewTokenListResponse_Errors_Item struct {
+	union json.RawMessage
+}
+
+// PreviewTokenRevokeAllResponse defines model for PreviewTokenRevokeAllResponse.
+type PreviewTokenRevokeAllResponse struct {
+	Data    *map[string]interface{}                      `json:"data,omitempty"`
+	Errors  *[]PreviewTokenRevokeAllResponse_Errors_Item `json:"errors,omitempty"`
+	Success *bool                                        `json:"success,omitempty"`
+}
+
+// PreviewTokenRevokeAllResponseErrors0 defines model for .
+type PreviewTokenRevokeAllResponseErrors0 = string
+
+// PreviewTokenRevokeAllResponseErrors1 defines model for .
+type PreviewTokenRevokeAllResponseErrors1 map[string]interface{}
+
+// PreviewTokenRevokeAllResponse_Errors_Item defines model for PreviewTokenRevokeAllResponse.errors.Item.
+type PreviewTokenRevokeAllResponse_Errors_Item struct {
+	union json.RawMessage
+}
+
+// PreviewTokenUpdateRequest defines model for PreviewTokenUpdateRequest.
+type PreviewTokenUpdateRequest struct {
+	// ExpiresAt UTC Timestamp until when this token is valid. Omitting this field will create a token without an expiry.
+	ExpiresAt *time.Time `json:"expires_at"`
+}
+
+// PreviewTokenUpdateResponse defines model for PreviewTokenUpdateResponse.
+type PreviewTokenUpdateResponse struct {
+	Data *struct {
+		SandboxId string       `json:"sandbox_id"`
+		Token     PreviewToken `json:"token"`
+	} `json:"data,omitempty"`
+	Errors  *[]PreviewTokenUpdateResponse_Errors_Item `json:"errors,omitempty"`
+	Success *bool                                     `json:"success,omitempty"`
+}
+
+// PreviewTokenUpdateResponseErrors0 defines model for .
+type PreviewTokenUpdateResponseErrors0 = string
+
+// PreviewTokenUpdateResponseErrors1 defines model for .
+type PreviewTokenUpdateResponseErrors1 map[string]interface{}
+
+// PreviewTokenUpdateResponse_Errors_Item defines model for PreviewTokenUpdateResponse.errors.Item.
+type PreviewTokenUpdateResponse_Errors_Item struct {
+	union json.RawMessage
+}
+
 // Sandbox defines model for Sandbox.
 type Sandbox struct {
-	Alias       *string  `json:"alias,omitempty"`
 	CreatedAt   Time     `json:"created_at"`
 	Description *string  `json:"description"`
 	Id          string   `json:"id"`
@@ -75,7 +181,16 @@ type SandboxCreateRequest struct {
 	ExternalResources *[]string `json:"external_resources,omitempty"`
 
 	// Files Map of `path => file` where each file is a map.
-	Files map[string]SandboxFile `json:"files"`
+	Files map[string]struct {
+		// BinaryContent If the file has binary (non plain-text) contents, place the base-64 encoded contents in this key. Should be empty or missing if `is_binary` is `false`.
+		BinaryContent *string `json:"binary_content,omitempty"`
+
+		// Code If the file is non-binary in nature, place the (escaped) plain text contents in this key. Should be empty or missing if `is_binary` is `true`.
+		Code *string `json:"code,omitempty"`
+
+		// IsBinary Whether the file contains binary contents.
+		IsBinary *bool `json:"is_binary,omitempty"`
+	} `json:"files"`
 
 	// IsFrozen Whether changes to the sandbox are disallowed. Defaults to `false`.
 	IsFrozen *bool `json:"is_frozen,omitempty"`
@@ -125,18 +240,6 @@ type SandboxCreateResponseErrors1 map[string]interface{}
 // SandboxCreateResponse_Errors_Item defines model for SandboxCreateResponse.errors.Item.
 type SandboxCreateResponse_Errors_Item struct {
 	union json.RawMessage
-}
-
-// SandboxFile defines model for SandboxFile.
-type SandboxFile struct {
-	// BinaryContent If the file has binary (non plain-text) contents, place the base-64 encoded contents in this key. Should be empty or missing if `is_binary` is `false`.
-	BinaryContent *string `json:"binary_content,omitempty"`
-
-	// Code If the file is non-binary in nature, place the (escaped) plain text contents in this key. Should be empty or missing if `is_binary` is `true`.
-	Code *string `json:"code,omitempty"`
-
-	// IsBinary Whether the file contains binary contents.
-	IsBinary *bool `json:"is_binary,omitempty"`
 }
 
 // SandboxForkRequest defines model for SandboxForkRequest.
@@ -590,6 +693,12 @@ type SandboxcreateJSONRequestBody = SandboxCreateRequest
 // SandboxforkJSONRequestBody defines body for Sandboxfork for application/json ContentType.
 type SandboxforkJSONRequestBody = SandboxForkRequest
 
+// PreviewTokencreateJSONRequestBody defines body for PreviewTokencreate for application/json ContentType.
+type PreviewTokencreateJSONRequestBody = PreviewTokenCreateRequest
+
+// PreviewTokenupdateJSONRequestBody defines body for PreviewTokenupdate for application/json ContentType.
+type PreviewTokenupdateJSONRequestBody = PreviewTokenUpdateRequest
+
 // VmhibernateJSONRequestBody defines body for Vmhibernate for application/json ContentType.
 type VmhibernateJSONRequestBody = VMHibernateRequest
 
@@ -610,6 +719,254 @@ type VmstartJSONRequestBody = VMStartRequest
 
 // VmupdateSpecs2JSONRequestBody defines body for VmupdateSpecs2 for application/json ContentType.
 type VmupdateSpecs2JSONRequestBody = VMUpdateSpecsRequest
+
+// AsPreviewTokenCreateResponseErrors0 returns the union data inside the PreviewTokenCreateResponse_Errors_Item as a PreviewTokenCreateResponseErrors0
+func (t PreviewTokenCreateResponse_Errors_Item) AsPreviewTokenCreateResponseErrors0() (PreviewTokenCreateResponseErrors0, error) {
+	var body PreviewTokenCreateResponseErrors0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPreviewTokenCreateResponseErrors0 overwrites any union data inside the PreviewTokenCreateResponse_Errors_Item as the provided PreviewTokenCreateResponseErrors0
+func (t *PreviewTokenCreateResponse_Errors_Item) FromPreviewTokenCreateResponseErrors0(v PreviewTokenCreateResponseErrors0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePreviewTokenCreateResponseErrors0 performs a merge with any union data inside the PreviewTokenCreateResponse_Errors_Item, using the provided PreviewTokenCreateResponseErrors0
+func (t *PreviewTokenCreateResponse_Errors_Item) MergePreviewTokenCreateResponseErrors0(v PreviewTokenCreateResponseErrors0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsPreviewTokenCreateResponseErrors1 returns the union data inside the PreviewTokenCreateResponse_Errors_Item as a PreviewTokenCreateResponseErrors1
+func (t PreviewTokenCreateResponse_Errors_Item) AsPreviewTokenCreateResponseErrors1() (PreviewTokenCreateResponseErrors1, error) {
+	var body PreviewTokenCreateResponseErrors1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPreviewTokenCreateResponseErrors1 overwrites any union data inside the PreviewTokenCreateResponse_Errors_Item as the provided PreviewTokenCreateResponseErrors1
+func (t *PreviewTokenCreateResponse_Errors_Item) FromPreviewTokenCreateResponseErrors1(v PreviewTokenCreateResponseErrors1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePreviewTokenCreateResponseErrors1 performs a merge with any union data inside the PreviewTokenCreateResponse_Errors_Item, using the provided PreviewTokenCreateResponseErrors1
+func (t *PreviewTokenCreateResponse_Errors_Item) MergePreviewTokenCreateResponseErrors1(v PreviewTokenCreateResponseErrors1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t PreviewTokenCreateResponse_Errors_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *PreviewTokenCreateResponse_Errors_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsPreviewTokenListResponseErrors0 returns the union data inside the PreviewTokenListResponse_Errors_Item as a PreviewTokenListResponseErrors0
+func (t PreviewTokenListResponse_Errors_Item) AsPreviewTokenListResponseErrors0() (PreviewTokenListResponseErrors0, error) {
+	var body PreviewTokenListResponseErrors0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPreviewTokenListResponseErrors0 overwrites any union data inside the PreviewTokenListResponse_Errors_Item as the provided PreviewTokenListResponseErrors0
+func (t *PreviewTokenListResponse_Errors_Item) FromPreviewTokenListResponseErrors0(v PreviewTokenListResponseErrors0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePreviewTokenListResponseErrors0 performs a merge with any union data inside the PreviewTokenListResponse_Errors_Item, using the provided PreviewTokenListResponseErrors0
+func (t *PreviewTokenListResponse_Errors_Item) MergePreviewTokenListResponseErrors0(v PreviewTokenListResponseErrors0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsPreviewTokenListResponseErrors1 returns the union data inside the PreviewTokenListResponse_Errors_Item as a PreviewTokenListResponseErrors1
+func (t PreviewTokenListResponse_Errors_Item) AsPreviewTokenListResponseErrors1() (PreviewTokenListResponseErrors1, error) {
+	var body PreviewTokenListResponseErrors1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPreviewTokenListResponseErrors1 overwrites any union data inside the PreviewTokenListResponse_Errors_Item as the provided PreviewTokenListResponseErrors1
+func (t *PreviewTokenListResponse_Errors_Item) FromPreviewTokenListResponseErrors1(v PreviewTokenListResponseErrors1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePreviewTokenListResponseErrors1 performs a merge with any union data inside the PreviewTokenListResponse_Errors_Item, using the provided PreviewTokenListResponseErrors1
+func (t *PreviewTokenListResponse_Errors_Item) MergePreviewTokenListResponseErrors1(v PreviewTokenListResponseErrors1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t PreviewTokenListResponse_Errors_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *PreviewTokenListResponse_Errors_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsPreviewTokenRevokeAllResponseErrors0 returns the union data inside the PreviewTokenRevokeAllResponse_Errors_Item as a PreviewTokenRevokeAllResponseErrors0
+func (t PreviewTokenRevokeAllResponse_Errors_Item) AsPreviewTokenRevokeAllResponseErrors0() (PreviewTokenRevokeAllResponseErrors0, error) {
+	var body PreviewTokenRevokeAllResponseErrors0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPreviewTokenRevokeAllResponseErrors0 overwrites any union data inside the PreviewTokenRevokeAllResponse_Errors_Item as the provided PreviewTokenRevokeAllResponseErrors0
+func (t *PreviewTokenRevokeAllResponse_Errors_Item) FromPreviewTokenRevokeAllResponseErrors0(v PreviewTokenRevokeAllResponseErrors0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePreviewTokenRevokeAllResponseErrors0 performs a merge with any union data inside the PreviewTokenRevokeAllResponse_Errors_Item, using the provided PreviewTokenRevokeAllResponseErrors0
+func (t *PreviewTokenRevokeAllResponse_Errors_Item) MergePreviewTokenRevokeAllResponseErrors0(v PreviewTokenRevokeAllResponseErrors0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsPreviewTokenRevokeAllResponseErrors1 returns the union data inside the PreviewTokenRevokeAllResponse_Errors_Item as a PreviewTokenRevokeAllResponseErrors1
+func (t PreviewTokenRevokeAllResponse_Errors_Item) AsPreviewTokenRevokeAllResponseErrors1() (PreviewTokenRevokeAllResponseErrors1, error) {
+	var body PreviewTokenRevokeAllResponseErrors1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPreviewTokenRevokeAllResponseErrors1 overwrites any union data inside the PreviewTokenRevokeAllResponse_Errors_Item as the provided PreviewTokenRevokeAllResponseErrors1
+func (t *PreviewTokenRevokeAllResponse_Errors_Item) FromPreviewTokenRevokeAllResponseErrors1(v PreviewTokenRevokeAllResponseErrors1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePreviewTokenRevokeAllResponseErrors1 performs a merge with any union data inside the PreviewTokenRevokeAllResponse_Errors_Item, using the provided PreviewTokenRevokeAllResponseErrors1
+func (t *PreviewTokenRevokeAllResponse_Errors_Item) MergePreviewTokenRevokeAllResponseErrors1(v PreviewTokenRevokeAllResponseErrors1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t PreviewTokenRevokeAllResponse_Errors_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *PreviewTokenRevokeAllResponse_Errors_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsPreviewTokenUpdateResponseErrors0 returns the union data inside the PreviewTokenUpdateResponse_Errors_Item as a PreviewTokenUpdateResponseErrors0
+func (t PreviewTokenUpdateResponse_Errors_Item) AsPreviewTokenUpdateResponseErrors0() (PreviewTokenUpdateResponseErrors0, error) {
+	var body PreviewTokenUpdateResponseErrors0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPreviewTokenUpdateResponseErrors0 overwrites any union data inside the PreviewTokenUpdateResponse_Errors_Item as the provided PreviewTokenUpdateResponseErrors0
+func (t *PreviewTokenUpdateResponse_Errors_Item) FromPreviewTokenUpdateResponseErrors0(v PreviewTokenUpdateResponseErrors0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePreviewTokenUpdateResponseErrors0 performs a merge with any union data inside the PreviewTokenUpdateResponse_Errors_Item, using the provided PreviewTokenUpdateResponseErrors0
+func (t *PreviewTokenUpdateResponse_Errors_Item) MergePreviewTokenUpdateResponseErrors0(v PreviewTokenUpdateResponseErrors0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsPreviewTokenUpdateResponseErrors1 returns the union data inside the PreviewTokenUpdateResponse_Errors_Item as a PreviewTokenUpdateResponseErrors1
+func (t PreviewTokenUpdateResponse_Errors_Item) AsPreviewTokenUpdateResponseErrors1() (PreviewTokenUpdateResponseErrors1, error) {
+	var body PreviewTokenUpdateResponseErrors1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPreviewTokenUpdateResponseErrors1 overwrites any union data inside the PreviewTokenUpdateResponse_Errors_Item as the provided PreviewTokenUpdateResponseErrors1
+func (t *PreviewTokenUpdateResponse_Errors_Item) FromPreviewTokenUpdateResponseErrors1(v PreviewTokenUpdateResponseErrors1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePreviewTokenUpdateResponseErrors1 performs a merge with any union data inside the PreviewTokenUpdateResponse_Errors_Item, using the provided PreviewTokenUpdateResponseErrors1
+func (t *PreviewTokenUpdateResponse_Errors_Item) MergePreviewTokenUpdateResponseErrors1(v PreviewTokenUpdateResponseErrors1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t PreviewTokenUpdateResponse_Errors_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *PreviewTokenUpdateResponse_Errors_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
 
 // AsSandboxCreateResponseErrors0 returns the union data inside the SandboxCreateResponse_Errors_Item as a SandboxCreateResponseErrors0
 func (t SandboxCreateResponse_Errors_Item) AsSandboxCreateResponseErrors0() (SandboxCreateResponseErrors0, error) {
@@ -1524,6 +1881,22 @@ type ClientInterface interface {
 
 	Sandboxfork(ctx context.Context, id string, body SandboxforkJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// PreviewTokenrevokeAll request
+	PreviewTokenrevokeAll(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PreviewTokenlist request
+	PreviewTokenlist(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PreviewTokencreateWithBody request with any body
+	PreviewTokencreateWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PreviewTokencreate(ctx context.Context, id string, body PreviewTokencreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PreviewTokenupdateWithBody request with any body
+	PreviewTokenupdateWithBody(ctx context.Context, id string, tokenId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PreviewTokenupdate(ctx context.Context, id string, tokenId string, body PreviewTokenupdateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// VmhibernateWithBody request with any body
 	VmhibernateWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -1706,6 +2079,78 @@ func (c *Client) SandboxforkWithBody(ctx context.Context, id string, contentType
 
 func (c *Client) Sandboxfork(ctx context.Context, id string, body SandboxforkJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewSandboxforkRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PreviewTokenrevokeAll(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPreviewTokenrevokeAllRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PreviewTokenlist(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPreviewTokenlistRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PreviewTokencreateWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPreviewTokencreateRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PreviewTokencreate(ctx context.Context, id string, body PreviewTokencreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPreviewTokencreateRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PreviewTokenupdateWithBody(ctx context.Context, id string, tokenId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPreviewTokenupdateRequestWithBody(c.Server, id, tokenId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PreviewTokenupdate(ctx context.Context, id string, tokenId string, body PreviewTokenupdateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPreviewTokenupdateRequest(c.Server, id, tokenId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -2302,6 +2747,175 @@ func NewSandboxforkRequestWithBody(server string, id string, contentType string,
 	return req, nil
 }
 
+// NewPreviewTokenrevokeAllRequest generates requests for PreviewTokenrevokeAll
+func NewPreviewTokenrevokeAllRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/sandbox/%s/tokens", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPreviewTokenlistRequest generates requests for PreviewTokenlist
+func NewPreviewTokenlistRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/sandbox/%s/tokens", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPreviewTokencreateRequest calls the generic PreviewTokencreate builder with application/json body
+func NewPreviewTokencreateRequest(server string, id string, body PreviewTokencreateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPreviewTokencreateRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPreviewTokencreateRequestWithBody generates requests for PreviewTokencreate with any type of body
+func NewPreviewTokencreateRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/sandbox/%s/tokens", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewPreviewTokenupdateRequest calls the generic PreviewTokenupdate builder with application/json body
+func NewPreviewTokenupdateRequest(server string, id string, tokenId string, body PreviewTokenupdateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPreviewTokenupdateRequestWithBody(server, id, tokenId, "application/json", bodyReader)
+}
+
+// NewPreviewTokenupdateRequestWithBody generates requests for PreviewTokenupdate with any type of body
+func NewPreviewTokenupdateRequestWithBody(server string, id string, tokenId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "token_id", runtime.ParamLocationPath, tokenId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/sandbox/%s/tokens/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewVmhibernateRequest calls the generic Vmhibernate builder with application/json body
 func NewVmhibernateRequest(server string, id string, body VmhibernateJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -2708,6 +3322,22 @@ type ClientWithResponsesInterface interface {
 
 	SandboxforkWithResponse(ctx context.Context, id string, body SandboxforkJSONRequestBody, reqEditors ...RequestEditorFn) (*SandboxforkResponse, error)
 
+	// PreviewTokenrevokeAllWithResponse request
+	PreviewTokenrevokeAllWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*PreviewTokenrevokeAllResponse, error)
+
+	// PreviewTokenlistWithResponse request
+	PreviewTokenlistWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*PreviewTokenlistResponse, error)
+
+	// PreviewTokencreateWithBodyWithResponse request with any body
+	PreviewTokencreateWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PreviewTokencreateResponse, error)
+
+	PreviewTokencreateWithResponse(ctx context.Context, id string, body PreviewTokencreateJSONRequestBody, reqEditors ...RequestEditorFn) (*PreviewTokencreateResponse, error)
+
+	// PreviewTokenupdateWithBodyWithResponse request with any body
+	PreviewTokenupdateWithBodyWithResponse(ctx context.Context, id string, tokenId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PreviewTokenupdateResponse, error)
+
+	PreviewTokenupdateWithResponse(ctx context.Context, id string, tokenId string, body PreviewTokenupdateJSONRequestBody, reqEditors ...RequestEditorFn) (*PreviewTokenupdateResponse, error)
+
 	// VmhibernateWithBodyWithResponse request with any body
 	VmhibernateWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*VmhibernateResponse, error)
 
@@ -2914,6 +3544,94 @@ func (r SandboxforkResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r SandboxforkResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PreviewTokenrevokeAllResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *PreviewTokenRevokeAllResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r PreviewTokenrevokeAllResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PreviewTokenrevokeAllResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PreviewTokenlistResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *PreviewTokenListResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r PreviewTokenlistResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PreviewTokenlistResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PreviewTokencreateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *PreviewTokenCreateResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r PreviewTokencreateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PreviewTokencreateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PreviewTokenupdateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *PreviewTokenUpdateResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r PreviewTokenupdateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PreviewTokenupdateResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -3184,6 +3902,58 @@ func (c *ClientWithResponses) SandboxforkWithResponse(ctx context.Context, id st
 		return nil, err
 	}
 	return ParseSandboxforkResponse(rsp)
+}
+
+// PreviewTokenrevokeAllWithResponse request returning *PreviewTokenrevokeAllResponse
+func (c *ClientWithResponses) PreviewTokenrevokeAllWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*PreviewTokenrevokeAllResponse, error) {
+	rsp, err := c.PreviewTokenrevokeAll(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePreviewTokenrevokeAllResponse(rsp)
+}
+
+// PreviewTokenlistWithResponse request returning *PreviewTokenlistResponse
+func (c *ClientWithResponses) PreviewTokenlistWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*PreviewTokenlistResponse, error) {
+	rsp, err := c.PreviewTokenlist(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePreviewTokenlistResponse(rsp)
+}
+
+// PreviewTokencreateWithBodyWithResponse request with arbitrary body returning *PreviewTokencreateResponse
+func (c *ClientWithResponses) PreviewTokencreateWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PreviewTokencreateResponse, error) {
+	rsp, err := c.PreviewTokencreateWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePreviewTokencreateResponse(rsp)
+}
+
+func (c *ClientWithResponses) PreviewTokencreateWithResponse(ctx context.Context, id string, body PreviewTokencreateJSONRequestBody, reqEditors ...RequestEditorFn) (*PreviewTokencreateResponse, error) {
+	rsp, err := c.PreviewTokencreate(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePreviewTokencreateResponse(rsp)
+}
+
+// PreviewTokenupdateWithBodyWithResponse request with arbitrary body returning *PreviewTokenupdateResponse
+func (c *ClientWithResponses) PreviewTokenupdateWithBodyWithResponse(ctx context.Context, id string, tokenId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PreviewTokenupdateResponse, error) {
+	rsp, err := c.PreviewTokenupdateWithBody(ctx, id, tokenId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePreviewTokenupdateResponse(rsp)
+}
+
+func (c *ClientWithResponses) PreviewTokenupdateWithResponse(ctx context.Context, id string, tokenId string, body PreviewTokenupdateJSONRequestBody, reqEditors ...RequestEditorFn) (*PreviewTokenupdateResponse, error) {
+	rsp, err := c.PreviewTokenupdate(ctx, id, tokenId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePreviewTokenupdateResponse(rsp)
 }
 
 // VmhibernateWithBodyWithResponse request with arbitrary body returning *VmhibernateResponse
@@ -3503,6 +4273,110 @@ func ParseSandboxforkResponse(rsp *http.Response) (*SandboxforkResponse, error) 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
 		var dest SandboxForkResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePreviewTokenrevokeAllResponse parses an HTTP response from a PreviewTokenrevokeAllWithResponse call
+func ParsePreviewTokenrevokeAllResponse(rsp *http.Response) (*PreviewTokenrevokeAllResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PreviewTokenrevokeAllResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest PreviewTokenRevokeAllResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePreviewTokenlistResponse parses an HTTP response from a PreviewTokenlistWithResponse call
+func ParsePreviewTokenlistResponse(rsp *http.Response) (*PreviewTokenlistResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PreviewTokenlistResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest PreviewTokenListResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePreviewTokencreateResponse parses an HTTP response from a PreviewTokencreateWithResponse call
+func ParsePreviewTokencreateResponse(rsp *http.Response) (*PreviewTokencreateResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PreviewTokencreateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest PreviewTokenCreateResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePreviewTokenupdateResponse parses an HTTP response from a PreviewTokenupdateWithResponse call
+func ParsePreviewTokenupdateResponse(rsp *http.Response) (*PreviewTokenupdateResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PreviewTokenupdateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest PreviewTokenUpdateResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
