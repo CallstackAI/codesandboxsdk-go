@@ -15,17 +15,20 @@ type SDKClient struct {
 	*ClientWithResponses
 }
 
-func NewSDKClient(baseURL, token string) (*SDKClient, error) {
+func NewSDKClient(baseURL, token string, opts ...ClientOption) (*SDKClient, error) {
 	httpClient := &http.Client{}
 	bearerAuth, err := securityprovider.NewSecurityProviderBearerToken(token)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create auth provider: %w", err)
 	}
-	client, err := NewClientWithResponses(
-		baseURL,
+	defaultOpts := []ClientOption{
 		WithHTTPClient(httpClient),
 		WithBaseURL(baseURL),
 		WithRequestEditorFn(bearerAuth.Intercept),
+	}
+	client, err := NewClientWithResponses(
+		baseURL,
+		append(defaultOpts, opts...)...,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create codesandbox SDK client: %w", err)
