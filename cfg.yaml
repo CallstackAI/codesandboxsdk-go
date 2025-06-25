@@ -1,5 +1,5 @@
-package: codesandboxsdk
-output: sdk.gen.go
+package: csbapi
+output: pkg/api/sdk.gen.go
 generate:
   client: true
   models: true

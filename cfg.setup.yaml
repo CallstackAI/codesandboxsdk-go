@@ -1,0 +1,6 @@
+package: csbsetup
+output: pkg/setup/sdk.gen.go
+generate:
+  client: true
+  models: true
+

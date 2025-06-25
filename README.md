@@ -36,7 +36,8 @@ func main() {
 ## Generating the SDK
 ```shell
 go install github.com/deepmap/oapi-codegen/v2/cmd/oapi-codegen@v2.2.0
-oapi-codegen -config cfg.yaml openapi-time.yaml
+oapi-codegen -config cfg.yaml openapi.yaml
+oapi-codegen -config cfg.setup.yaml openapi.setup.yaml
 ```
 
 ## OpenAPI Specification

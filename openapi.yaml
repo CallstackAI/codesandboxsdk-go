@@ -129,7 +129,6 @@ components:
         created_at:
           format: date-time
           type: string
-          x-go-type: Time
         description:
           nullable: true
           type: string
@@ -149,7 +148,6 @@ components:
         updated_at:
           format: date-time
           type: string
-          x-go-type: Time
       required:
         - id
         - privacy
@@ -158,40 +156,6 @@ components:
         - updated_at
         - tags
       title: Sandbox
-      type: object
-    SandboxStartOptions:
-      description: Optional VM start configuration. If provided, the sandbox VM will be started immediately after creation.
-      properties:
-        hibernation_timeout_seconds:
-          description: |
-            The time in seconds after which the VM will hibernate due to inactivity.
-            Must be a positive integer between 1 and 86400 (24 hours).
-            Defaults to 300 seconds (5 minutes) if not specified.
-          example: 300
-          maximum: 86400
-          minimum: 1
-          type: integer
-        ipcountry:
-          description: This determines in which cluster, closest to the given country the VM will be started in. The format is ISO-3166-1 alpha-2. If not set, the VM will be started closest to the caller of this API. This will only be applied when a VM is run for the first time, and will only serve as a hint (e.g. if the template of this sandbox runs in EU cluster, this sandbox will also run in the EU cluster).
-          example: NL
-          pattern: ^[A-Z]{2}$
-          type: string
-        tier:
-          description: |
-            Determines which specs to start the VM with. If not specified, the VM will start with the default specs for the workspace.
-
-            You can only specify a VM tier when starting a VM that is inside your workspace. Specifying a VM tier for someone else's sandbox will return an error.
-
-            Not all tiers will be available depending on the workspace subscription status, and higher tiers incur higher costs. Please see codesandbox.io/pricing for details on specs and costs.
-          enum:
-            - Pico
-            - Nano
-            - Micro
-            - Small
-            - Medium
-            - Large
-            - XLarge
-          example: Micro
       type: object
     Error:
       oneOf:
@@ -210,6 +174,32 @@ components:
           nullable: true
           type: string
       title: PreviewTokenCreateRequest
+      type: object
+    VMCreateTagResponse:
+      allOf:
+        - properties:
+            errors:
+              items:
+                oneOf:
+                  - type: string
+                  - additionalProperties: true
+                    type: object
+                title: Error
+              type: array
+            success:
+              type: boolean
+          title: Response
+          type: object
+        - properties:
+            data:
+              properties:
+                tag_id:
+                  type: string
+              required:
+                - tag_id
+              type: object
+          type: object
+      title: VMCreateTagResponse
       type: object
     SandboxGetResponse:
       allOf:
@@ -252,7 +242,51 @@ components:
           description: Sandbox privacy. 0 for public, 1 for unlisted, and 2 for private. Subject to the minimum privacy restrictions of the workspace. Defaults to the privacy of the original sandbox.
           type: integer
         start_options:
-          $ref: "#/components/schemas/SandboxStartOptions"
+          description: Optional VM start configuration. If provided, the sandbox VM will be started immediately after creation.
+          properties:
+            automatic_wakeup_config:
+              description: Configuration for when the VM should automatically wake up from hibernation
+              properties:
+                http:
+                  default: true
+                  description: Whether the VM should automatically wake up on HTTP requests (excludes WebSocket requests)
+                  type: boolean
+                websocket:
+                  default: false
+                  description: Whether the VM should automatically wake up on WebSocket connections
+                  type: boolean
+              type: object
+            hibernation_timeout_seconds:
+              description: |
+                The time in seconds after which the VM will hibernate due to inactivity.
+                Must be a positive integer between 1 and 86400 (24 hours).
+                Defaults to 300 seconds (5 minutes) if not specified.
+              example: 300
+              maximum: 86400
+              minimum: 1
+              type: integer
+            ipcountry:
+              description: This determines in which cluster, closest to the given country the VM will be started in. The format is ISO-3166-1 alpha-2. If not set, the VM will be started closest to the caller of this API. This will only be applied when a VM is run for the first time, and will only serve as a hint (e.g. if the template of this sandbox runs in EU cluster, this sandbox will also run in the EU cluster).
+              example: NL
+              pattern: ^[A-Z]{2}$
+              type: string
+            tier:
+              description: |
+                Determines which specs to start the VM with. If not specified, the VM will start with the default specs for the workspace.
+
+                You can only specify a VM tier when starting a VM that is inside your workspace. Specifying a VM tier for someone else's sandbox will return an error.
+
+                Not all tiers will be available depending on the workspace subscription status, and higher tiers incur higher costs. Please see codesandbox.io/pricing for details on specs and costs.
+              enum:
+                - Pico
+                - Nano
+                - Micro
+                - Small
+                - Medium
+                - Large
+                - XLarge
+              example: Micro
+          type: object
         tags:
           default: []
           description: Tags to set on the new sandbox, if any. Will not inherit tags from the source sandbox.
@@ -460,6 +494,18 @@ components:
       type: object
     VMStartRequest:
       properties:
+        automatic_wakeup_config:
+          description: Configuration for when the VM should automatically wake up from hibernation
+          properties:
+            http:
+              default: true
+              description: Whether the VM should automatically wake up on HTTP requests (excludes WebSocket requests)
+              type: boolean
+            websocket:
+              default: false
+              description: Whether the VM should automatically wake up on WebSocket connections
+              type: boolean
+          type: object
         hibernation_timeout_seconds:
           description: |
             The time in seconds after which the VM will hibernate due to inactivity.
@@ -501,6 +547,43 @@ components:
           type: string
       title: PreviewTokenUpdateRequest
       type: object
+    PreviewHostListResponse:
+      allOf:
+        - properties:
+            errors:
+              items:
+                oneOf:
+                  - type: string
+                  - additionalProperties: true
+                    type: object
+                title: Error
+              type: array
+            success:
+              type: boolean
+          title: Response
+          type: object
+        - properties:
+            data:
+              properties:
+                preview_hosts:
+                  items:
+                    properties:
+                      host:
+                        type: string
+                      inserted_at:
+                        format: date_time
+                        type: string
+                    required:
+                      - host
+                      - inserted_at
+                    type: object
+                  type: array
+              required:
+                - preview_hosts
+              type: object
+          type: object
+      title: PreviewHostListResponse
+      type: object
     VMShutdownRequest:
       properties: {}
       title: VMShutdownRequest
@@ -534,42 +617,28 @@ components:
         - name
       title: WorkspaceCreateRequest
       type: object
-    VMStartData:
+    VMCreateTagRequest:
+      description: Create a tag for a list of VM IDs
       properties:
-        bootup_type:
-          type: string
-        cluster:
-          type: string
-        id:
-          type: string
-        latest_pitcher_version:
-          type: string
-        pitcher_manager_version:
-          type: string
-        pitcher_token:
-          type: string
-        pitcher_url:
-          type: string
-        pitcher_version:
-          type: string
-        reconnect_token:
-          type: string
-        user_workspace_path:
-          type: string
-        workspace_path:
-          type: string
+        vm_ids:
+          items:
+            type: string
+          type: array
       required:
-        - bootup_type
-        - cluster
-        - id
-        - latest_pitcher_version
-        - pitcher_manager_version
-        - pitcher_token
-        - pitcher_url
-        - pitcher_version
-        - reconnect_token
-        - user_workspace_path
-        - workspace_path
+        - vm_ids
+      title: VMCreateTagRequest
+      type: object
+    PreviewHostRequest:
+      properties:
+        hosts:
+          items:
+            description: Trusted domains that are allowed to access sandbox previews.
+            example: https://example.com
+            type: string
+          type: array
+      required:
+        - hosts
+      title: PreviewHostRequest
       type: object
     VMStartResponse:
       allOf:
@@ -588,7 +657,42 @@ components:
           type: object
         - properties:
             data:
-              $ref: '#/components/schemas/VMStartData'
+              properties:
+                bootup_type:
+                  type: string
+                cluster:
+                  type: string
+                id:
+                  type: string
+                latest_pitcher_version:
+                  type: string
+                pitcher_manager_version:
+                  type: string
+                pitcher_token:
+                  type: string
+                pitcher_url:
+                  type: string
+                pitcher_version:
+                  type: string
+                reconnect_token:
+                  type: string
+                user_workspace_path:
+                  type: string
+                workspace_path:
+                  type: string
+              required:
+                - bootup_type
+                - cluster
+                - id
+                - latest_pitcher_version
+                - pitcher_manager_version
+                - pitcher_token
+                - pitcher_url
+                - pitcher_version
+                - reconnect_token
+                - user_workspace_path
+                - workspace_path
+              type: object
           type: object
       title: VMStartResponse
       type: object
@@ -693,6 +797,42 @@ components:
       required:
         - files
       title: SandboxCreateRequest
+    VMListClustersResponse:
+      allOf:
+        - properties:
+            errors:
+              items:
+                oneOf:
+                  - type: string
+                  - additionalProperties: true
+                    type: object
+                title: Error
+              type: array
+            success:
+              type: boolean
+          title: Response
+          type: object
+        - properties:
+            data:
+              properties:
+                clusters:
+                  items:
+                    properties:
+                      host:
+                        type: string
+                      slug:
+                        type: string
+                    required:
+                      - host
+                      - slug
+                    type: object
+                  type: array
+              required:
+                - clusters
+              type: object
+          type: object
+      title: VMListClustersResponse
+      type: object
     TokenUpdateResponse:
       allOf:
         - properties:
@@ -809,6 +949,15 @@ components:
       type: object
     VMCreateSessionRequest:
       properties:
+        git_access_token:
+          description: GitHub token for the session
+          type: string
+        git_user_email:
+          description: Git user email to configure for this session
+          type: string
+        git_user_name:
+          description: Git user name to configure for this session
+          type: string
         permission:
           description: Permission level for the session
           enum:
@@ -956,7 +1105,44 @@ components:
                 id:
                   type: string
                 start_response:
-                  $ref: '#/components/schemas/VMStartData'
+                  description: VM start response. Only present when start_options were provided in the request.
+                  nullable: true
+                  properties:
+                    bootup_type:
+                      type: string
+                    cluster:
+                      type: string
+                    id:
+                      type: string
+                    latest_pitcher_version:
+                      type: string
+                    pitcher_manager_version:
+                      type: string
+                    pitcher_token:
+                      type: string
+                    pitcher_url:
+                      type: string
+                    pitcher_version:
+                      type: string
+                    reconnect_token:
+                      type: string
+                    user_workspace_path:
+                      type: string
+                    workspace_path:
+                      type: string
+                  required:
+                    - bootup_type
+                    - cluster
+                    - id
+                    - latest_pitcher_version
+                    - pitcher_manager_version
+                    - pitcher_token
+                    - pitcher_url
+                    - pitcher_version
+                    - reconnect_token
+                    - user_workspace_path
+                    - workspace_path
+                  type: object
                 title:
                   nullable: true
                   type: string
@@ -1326,7 +1512,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PreviewTokenRevokeAllResponse'
-          description: RevokeALlPreviewTokensResponse
+          description: RevokeAllPreviewTokensResponse
       security:
         - authorization:
             - preview_token:manage
@@ -1429,6 +1615,53 @@ paths:
             - preview_token:manage
       summary: Update a Preview Token
       tags: []
+  /vm/clusters:
+    get:
+      callbacks: {}
+      description: |
+        List all available clusters.
+      operationId: vm/list_clusters
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VMListClustersResponse'
+          description: VM List Clusters Response
+      security:
+        - authorization:
+            - vm:manage
+      summary: List all available clusters
+      tags:
+        - vm
+  /vm/tag:
+    post:
+      callbacks: {}
+      description: |
+        Creates a new tag for a VM.
+      operationId: vm/create_tag
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VMCreateTagRequest'
+        description: VM Create Tag Request
+        required: false
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VMCreateTagResponse'
+          description: VM Create Tag Response
+      security:
+        - authorization:
+            - vm:manage
+      summary: Create a new tag for a VM
+      tags:
+        - vm
   /vm/{id}/hibernate:
     post:
       callbacks: {}
@@ -1513,6 +1746,8 @@ paths:
         Creates a new session on a running VM. A session represents an isolated Linux user, with their own container.
         A session has a single use token that the user can use to connect to the VM. This token has specific permissions (currently, read or write).
         The session is identified by a unique session ID, and the Linux username is based on the session ID.
+
+        The Git user name and email can be configured via parameters.
 
         This endpoint requires the VM to be running. If the VM is not running, it will return a 404 error.
       operationId: vm/create_session
@@ -1699,6 +1934,75 @@ paths:
       summary: Update VM Specs
       tags:
         - vm
+  /workspace/preview_hosts:
+    get:
+      callbacks: {}
+      description: |
+        List all trusted preview hosts for the current team
+      operationId: preview_host/list
+      parameters: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewHostListResponse'
+          description: Preview Host List Response
+      security:
+        - authorization:
+            - vm:manage
+      summary: List Preview Hosts
+      tags: []
+    post:
+      callbacks: {}
+      description: |
+        Add one or more trusted domains that are allowed to access sandbox previews for this workspace.
+      operationId: preview_host/create
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreviewHostRequest'
+        description: Preview Host Create Request
+        required: false
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewHostListResponse'
+          description: Preview Host List Response
+      security:
+        - authorization:
+            - vm:manage
+      summary: Create Preview Hosts
+      tags: []
+    put:
+      callbacks: {}
+      description: |
+        Replace the list of trusted domains that are allowed to access sandbox previews for this workspace.
+      operationId: preview_host/update
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreviewHostRequest'
+        description: Preview Host Update Request
+        required: false
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewHostListResponse'
+          description: Preview Host List Response
+      security:
+        - authorization:
+            - vm:manage
+      summary: Update Preview Hosts
+      tags: []
 security: []
 servers:
   - url: https://api.codesandbox.stream
