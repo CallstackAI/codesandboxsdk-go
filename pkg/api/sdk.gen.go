@@ -48,6 +48,24 @@ type MetaInformation struct {
 		Team    *openapi_types.UUID `json:"team"`
 		Version string              `json:"version"`
 	} `json:"auth,omitempty"`
+
+	// RateLimits Current workspace rate limits
+	RateLimits *struct {
+		ConcurrentVms struct {
+			Limit     *int `json:"limit,omitempty"`
+			Remaining *int `json:"remaining,omitempty"`
+		} `json:"concurrent_vms"`
+		RequestsHourly struct {
+			Limit     *int `json:"limit,omitempty"`
+			Remaining *int `json:"remaining,omitempty"`
+			Reset     *int `json:"reset,omitempty"`
+		} `json:"requests_hourly"`
+		SandboxesHourly struct {
+			Limit     *int `json:"limit,omitempty"`
+			Remaining *int `json:"remaining,omitempty"`
+			Reset     *int `json:"reset,omitempty"`
+		} `json:"sandboxes_hourly"`
+	} `json:"rate_limits,omitempty"`
 }
 
 // PreviewHostListResponse defines model for PreviewHostListResponse.
@@ -400,6 +418,45 @@ type SandboxListResponse_Errors_Item struct {
 	union json.RawMessage
 }
 
+// TemplateCreateRequest defines model for TemplateCreateRequest.
+type TemplateCreateRequest struct {
+	// Description Template description. Maximum 255 characters. Defaults to description of original sandbox.
+	Description *string `json:"description,omitempty"`
+
+	// ForkOf Short ID of the sandbox to fork.
+	ForkOf string `json:"forkOf"`
+
+	// Tags Tags to set on the new sandbox, if any. Will not inherit tags from the source sandbox.
+	Tags *[]string `json:"tags,omitempty"`
+
+	// Title Template title. Maximum 255 characters. Defaults to title of original sandbox with (forked).
+	Title *string `json:"title,omitempty"`
+}
+
+// TemplateCreateResponse defines model for TemplateCreateResponse.
+type TemplateCreateResponse struct {
+	Data *struct {
+		Sandboxes []struct {
+			Cluster string `json:"cluster"`
+			Id      string `json:"id"`
+		} `json:"sandboxes"`
+		Tag string `json:"tag"`
+	} `json:"data,omitempty"`
+	Errors  *[]TemplateCreateResponse_Errors_Item `json:"errors,omitempty"`
+	Success *bool                                 `json:"success,omitempty"`
+}
+
+// TemplateCreateResponseErrors0 defines model for .
+type TemplateCreateResponseErrors0 = string
+
+// TemplateCreateResponseErrors1 defines model for .
+type TemplateCreateResponseErrors1 map[string]interface{}
+
+// TemplateCreateResponse_Errors_Item defines model for TemplateCreateResponse.errors.Item.
+type TemplateCreateResponse_Errors_Item struct {
+	union json.RawMessage
+}
+
 // TokenCreateRequest defines model for TokenCreateRequest.
 type TokenCreateRequest struct {
 	// DefaultVersion API Version to use, formatted as YYYY-MM-DD. Defaults to the latest version at time of creation.
@@ -476,6 +533,35 @@ type TokenUpdateResponseErrors1 map[string]interface{}
 
 // TokenUpdateResponse_Errors_Item defines model for TokenUpdateResponse.errors.Item.
 type TokenUpdateResponse_Errors_Item struct {
+	union json.RawMessage
+}
+
+// VMAssignTagAliasRequest Assign a tag alias to a VM
+type VMAssignTagAliasRequest struct {
+	TagId string `json:"tag_id"`
+}
+
+// VMAssignTagAliasResponse defines model for VMAssignTagAliasResponse.
+type VMAssignTagAliasResponse struct {
+	Data *struct {
+		Alias      string `json:"alias"`
+		Namespace  string `json:"namespace"`
+		TagAliasId string `json:"tag_alias_id"`
+		TagId      string `json:"tag_id"`
+		TeamId     string `json:"team_id"`
+	} `json:"data,omitempty"`
+	Errors  *[]VMAssignTagAliasResponse_Errors_Item `json:"errors,omitempty"`
+	Success *bool                                   `json:"success,omitempty"`
+}
+
+// VMAssignTagAliasResponseErrors0 defines model for .
+type VMAssignTagAliasResponseErrors0 = string
+
+// VMAssignTagAliasResponseErrors1 defines model for .
+type VMAssignTagAliasResponseErrors1 map[string]interface{}
+
+// VMAssignTagAliasResponse_Errors_Item defines model for VMAssignTagAliasResponse.errors.Item.
+type VMAssignTagAliasResponse_Errors_Item struct {
 	union json.RawMessage
 }
 
@@ -602,6 +688,38 @@ type VMListClustersResponseErrors1 map[string]interface{}
 
 // VMListClustersResponse_Errors_Item defines model for VMListClustersResponse.errors.Item.
 type VMListClustersResponse_Errors_Item struct {
+	union json.RawMessage
+}
+
+// VMListRunningVMsResponse defines model for VMListRunningVMsResponse.
+type VMListRunningVMsResponse struct {
+	Data *struct {
+		ConcurrentVmCount int `json:"concurrent_vm_count"`
+		ConcurrentVmLimit int `json:"concurrent_vm_limit"`
+		Vms               []struct {
+			CreditBasis      *string `json:"credit_basis,omitempty"`
+			Id               *string `json:"id,omitempty"`
+			LastActiveAt     *int    `json:"last_active_at,omitempty"`
+			SessionStartedAt *int    `json:"session_started_at,omitempty"`
+			Specs            *struct {
+				Cpu     *int `json:"cpu,omitempty"`
+				Memory  *int `json:"memory,omitempty"`
+				Storage *int `json:"storage,omitempty"`
+			} `json:"specs,omitempty"`
+		} `json:"vms"`
+	} `json:"data,omitempty"`
+	Errors  *[]VMListRunningVMsResponse_Errors_Item `json:"errors,omitempty"`
+	Success *bool                                   `json:"success,omitempty"`
+}
+
+// VMListRunningVMsResponseErrors0 defines model for .
+type VMListRunningVMsResponseErrors0 = string
+
+// VMListRunningVMsResponseErrors1 defines model for .
+type VMListRunningVMsResponseErrors1 map[string]interface{}
+
+// VMListRunningVMsResponse_Errors_Item defines model for VMListRunningVMsResponse.errors.Item.
+type VMListRunningVMsResponse_Errors_Item struct {
 	union json.RawMessage
 }
 
@@ -809,6 +927,12 @@ type PreviewTokencreateJSONRequestBody = PreviewTokenCreateRequest
 
 // PreviewTokenupdateJSONRequestBody defines body for PreviewTokenupdate for application/json ContentType.
 type PreviewTokenupdateJSONRequestBody = PreviewTokenUpdateRequest
+
+// TemplatescreateJSONRequestBody defines body for Templatescreate for application/json ContentType.
+type TemplatescreateJSONRequestBody = TemplateCreateRequest
+
+// VmassignTagAliasJSONRequestBody defines body for VmassignTagAlias for application/json ContentType.
+type VmassignTagAliasJSONRequestBody = VMAssignTagAliasRequest
 
 // VmcreateTagJSONRequestBody defines body for VmcreateTag for application/json ContentType.
 type VmcreateTagJSONRequestBody = VMCreateTagRequest
@@ -1398,6 +1522,68 @@ func (t *SandboxListResponse_Errors_Item) UnmarshalJSON(b []byte) error {
 	return err
 }
 
+// AsTemplateCreateResponseErrors0 returns the union data inside the TemplateCreateResponse_Errors_Item as a TemplateCreateResponseErrors0
+func (t TemplateCreateResponse_Errors_Item) AsTemplateCreateResponseErrors0() (TemplateCreateResponseErrors0, error) {
+	var body TemplateCreateResponseErrors0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromTemplateCreateResponseErrors0 overwrites any union data inside the TemplateCreateResponse_Errors_Item as the provided TemplateCreateResponseErrors0
+func (t *TemplateCreateResponse_Errors_Item) FromTemplateCreateResponseErrors0(v TemplateCreateResponseErrors0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeTemplateCreateResponseErrors0 performs a merge with any union data inside the TemplateCreateResponse_Errors_Item, using the provided TemplateCreateResponseErrors0
+func (t *TemplateCreateResponse_Errors_Item) MergeTemplateCreateResponseErrors0(v TemplateCreateResponseErrors0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsTemplateCreateResponseErrors1 returns the union data inside the TemplateCreateResponse_Errors_Item as a TemplateCreateResponseErrors1
+func (t TemplateCreateResponse_Errors_Item) AsTemplateCreateResponseErrors1() (TemplateCreateResponseErrors1, error) {
+	var body TemplateCreateResponseErrors1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromTemplateCreateResponseErrors1 overwrites any union data inside the TemplateCreateResponse_Errors_Item as the provided TemplateCreateResponseErrors1
+func (t *TemplateCreateResponse_Errors_Item) FromTemplateCreateResponseErrors1(v TemplateCreateResponseErrors1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeTemplateCreateResponseErrors1 performs a merge with any union data inside the TemplateCreateResponse_Errors_Item, using the provided TemplateCreateResponseErrors1
+func (t *TemplateCreateResponse_Errors_Item) MergeTemplateCreateResponseErrors1(v TemplateCreateResponseErrors1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t TemplateCreateResponse_Errors_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *TemplateCreateResponse_Errors_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
 // AsTokenCreateResponseErrors0 returns the union data inside the TokenCreateResponse_Errors_Item as a TokenCreateResponseErrors0
 func (t TokenCreateResponse_Errors_Item) AsTokenCreateResponseErrors0() (TokenCreateResponseErrors0, error) {
 	var body TokenCreateResponseErrors0
@@ -1518,6 +1704,68 @@ func (t TokenUpdateResponse_Errors_Item) MarshalJSON() ([]byte, error) {
 }
 
 func (t *TokenUpdateResponse_Errors_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsVMAssignTagAliasResponseErrors0 returns the union data inside the VMAssignTagAliasResponse_Errors_Item as a VMAssignTagAliasResponseErrors0
+func (t VMAssignTagAliasResponse_Errors_Item) AsVMAssignTagAliasResponseErrors0() (VMAssignTagAliasResponseErrors0, error) {
+	var body VMAssignTagAliasResponseErrors0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromVMAssignTagAliasResponseErrors0 overwrites any union data inside the VMAssignTagAliasResponse_Errors_Item as the provided VMAssignTagAliasResponseErrors0
+func (t *VMAssignTagAliasResponse_Errors_Item) FromVMAssignTagAliasResponseErrors0(v VMAssignTagAliasResponseErrors0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeVMAssignTagAliasResponseErrors0 performs a merge with any union data inside the VMAssignTagAliasResponse_Errors_Item, using the provided VMAssignTagAliasResponseErrors0
+func (t *VMAssignTagAliasResponse_Errors_Item) MergeVMAssignTagAliasResponseErrors0(v VMAssignTagAliasResponseErrors0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsVMAssignTagAliasResponseErrors1 returns the union data inside the VMAssignTagAliasResponse_Errors_Item as a VMAssignTagAliasResponseErrors1
+func (t VMAssignTagAliasResponse_Errors_Item) AsVMAssignTagAliasResponseErrors1() (VMAssignTagAliasResponseErrors1, error) {
+	var body VMAssignTagAliasResponseErrors1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromVMAssignTagAliasResponseErrors1 overwrites any union data inside the VMAssignTagAliasResponse_Errors_Item as the provided VMAssignTagAliasResponseErrors1
+func (t *VMAssignTagAliasResponse_Errors_Item) FromVMAssignTagAliasResponseErrors1(v VMAssignTagAliasResponseErrors1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeVMAssignTagAliasResponseErrors1 performs a merge with any union data inside the VMAssignTagAliasResponse_Errors_Item, using the provided VMAssignTagAliasResponseErrors1
+func (t *VMAssignTagAliasResponse_Errors_Item) MergeVMAssignTagAliasResponseErrors1(v VMAssignTagAliasResponseErrors1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t VMAssignTagAliasResponse_Errors_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *VMAssignTagAliasResponse_Errors_Item) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
@@ -1766,6 +2014,68 @@ func (t VMListClustersResponse_Errors_Item) MarshalJSON() ([]byte, error) {
 }
 
 func (t *VMListClustersResponse_Errors_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsVMListRunningVMsResponseErrors0 returns the union data inside the VMListRunningVMsResponse_Errors_Item as a VMListRunningVMsResponseErrors0
+func (t VMListRunningVMsResponse_Errors_Item) AsVMListRunningVMsResponseErrors0() (VMListRunningVMsResponseErrors0, error) {
+	var body VMListRunningVMsResponseErrors0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromVMListRunningVMsResponseErrors0 overwrites any union data inside the VMListRunningVMsResponse_Errors_Item as the provided VMListRunningVMsResponseErrors0
+func (t *VMListRunningVMsResponse_Errors_Item) FromVMListRunningVMsResponseErrors0(v VMListRunningVMsResponseErrors0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeVMListRunningVMsResponseErrors0 performs a merge with any union data inside the VMListRunningVMsResponse_Errors_Item, using the provided VMListRunningVMsResponseErrors0
+func (t *VMListRunningVMsResponse_Errors_Item) MergeVMListRunningVMsResponseErrors0(v VMListRunningVMsResponseErrors0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsVMListRunningVMsResponseErrors1 returns the union data inside the VMListRunningVMsResponse_Errors_Item as a VMListRunningVMsResponseErrors1
+func (t VMListRunningVMsResponse_Errors_Item) AsVMListRunningVMsResponseErrors1() (VMListRunningVMsResponseErrors1, error) {
+	var body VMListRunningVMsResponseErrors1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromVMListRunningVMsResponseErrors1 overwrites any union data inside the VMListRunningVMsResponse_Errors_Item as the provided VMListRunningVMsResponseErrors1
+func (t *VMListRunningVMsResponse_Errors_Item) FromVMListRunningVMsResponseErrors1(v VMListRunningVMsResponseErrors1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeVMListRunningVMsResponseErrors1 performs a merge with any union data inside the VMListRunningVMsResponse_Errors_Item, using the provided VMListRunningVMsResponseErrors1
+func (t *VMListRunningVMsResponse_Errors_Item) MergeVMListRunningVMsResponseErrors1(v VMListRunningVMsResponseErrors1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t VMListRunningVMsResponse_Errors_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *VMListRunningVMsResponse_Errors_Item) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
@@ -2203,8 +2513,21 @@ type ClientInterface interface {
 
 	PreviewTokenupdate(ctx context.Context, id string, tokenId string, body PreviewTokenupdateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// TemplatescreateWithBody request with any body
+	TemplatescreateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	Templatescreate(ctx context.Context, body TemplatescreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// VmassignTagAliasWithBody request with any body
+	VmassignTagAliasWithBody(ctx context.Context, namespace string, alias string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	VmassignTagAlias(ctx context.Context, namespace string, alias string, body VmassignTagAliasJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// VmlistClusters request
 	VmlistClusters(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// VmlistRunningVms request
+	VmlistRunningVms(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// VmcreateTagWithBody request with any body
 	VmcreateTagWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -2488,8 +2811,68 @@ func (c *Client) PreviewTokenupdate(ctx context.Context, id string, tokenId stri
 	return c.Client.Do(req)
 }
 
+func (c *Client) TemplatescreateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTemplatescreateRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) Templatescreate(ctx context.Context, body TemplatescreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTemplatescreateRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) VmassignTagAliasWithBody(ctx context.Context, namespace string, alias string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewVmassignTagAliasRequestWithBody(c.Server, namespace, alias, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) VmassignTagAlias(ctx context.Context, namespace string, alias string, body VmassignTagAliasJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewVmassignTagAliasRequest(c.Server, namespace, alias, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) VmlistClusters(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewVmlistClustersRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) VmlistRunningVms(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewVmlistRunningVmsRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -3339,6 +3722,100 @@ func NewPreviewTokenupdateRequestWithBody(server string, id string, tokenId stri
 	return req, nil
 }
 
+// NewTemplatescreateRequest calls the generic Templatescreate builder with application/json body
+func NewTemplatescreateRequest(server string, body TemplatescreateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewTemplatescreateRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewTemplatescreateRequestWithBody generates requests for Templatescreate with any type of body
+func NewTemplatescreateRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/templates")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewVmassignTagAliasRequest calls the generic VmassignTagAlias builder with application/json body
+func NewVmassignTagAliasRequest(server string, namespace string, alias string, body VmassignTagAliasJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewVmassignTagAliasRequestWithBody(server, namespace, alias, "application/json", bodyReader)
+}
+
+// NewVmassignTagAliasRequestWithBody generates requests for VmassignTagAlias with any type of body
+func NewVmassignTagAliasRequestWithBody(server string, namespace string, alias string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "namespace", runtime.ParamLocationPath, namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "alias", runtime.ParamLocationPath, alias)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/vm/alias/%s/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewVmlistClustersRequest generates requests for VmlistClusters
 func NewVmlistClustersRequest(server string) (*http.Request, error) {
 	var err error
@@ -3349,6 +3826,33 @@ func NewVmlistClustersRequest(server string) (*http.Request, error) {
 	}
 
 	operationPath := fmt.Sprintf("/vm/clusters")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewVmlistRunningVmsRequest generates requests for VmlistRunningVms
+func NewVmlistRunningVmsRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/vm/running")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -3935,8 +4439,21 @@ type ClientWithResponsesInterface interface {
 
 	PreviewTokenupdateWithResponse(ctx context.Context, id string, tokenId string, body PreviewTokenupdateJSONRequestBody, reqEditors ...RequestEditorFn) (*PreviewTokenupdateResponse, error)
 
+	// TemplatescreateWithBodyWithResponse request with any body
+	TemplatescreateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TemplatescreateResponse, error)
+
+	TemplatescreateWithResponse(ctx context.Context, body TemplatescreateJSONRequestBody, reqEditors ...RequestEditorFn) (*TemplatescreateResponse, error)
+
+	// VmassignTagAliasWithBodyWithResponse request with any body
+	VmassignTagAliasWithBodyWithResponse(ctx context.Context, namespace string, alias string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*VmassignTagAliasResponse, error)
+
+	VmassignTagAliasWithResponse(ctx context.Context, namespace string, alias string, body VmassignTagAliasJSONRequestBody, reqEditors ...RequestEditorFn) (*VmassignTagAliasResponse, error)
+
 	// VmlistClustersWithResponse request
 	VmlistClustersWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*VmlistClustersResponse, error)
+
+	// VmlistRunningVmsWithResponse request
+	VmlistRunningVmsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*VmlistRunningVmsResponse, error)
 
 	// VmcreateTagWithBodyWithResponse request with any body
 	VmcreateTagWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*VmcreateTagResponse, error)
@@ -4256,6 +4773,50 @@ func (r PreviewTokenupdateResponse) StatusCode() int {
 	return 0
 }
 
+type TemplatescreateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *TemplateCreateResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r TemplatescreateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r TemplatescreateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type VmassignTagAliasResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *VMAssignTagAliasResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r VmassignTagAliasResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r VmassignTagAliasResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type VmlistClustersResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -4272,6 +4833,28 @@ func (r VmlistClustersResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r VmlistClustersResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type VmlistRunningVmsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *VMListRunningVMsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r VmlistRunningVmsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r VmlistRunningVmsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -4684,6 +5267,40 @@ func (c *ClientWithResponses) PreviewTokenupdateWithResponse(ctx context.Context
 	return ParsePreviewTokenupdateResponse(rsp)
 }
 
+// TemplatescreateWithBodyWithResponse request with arbitrary body returning *TemplatescreateResponse
+func (c *ClientWithResponses) TemplatescreateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TemplatescreateResponse, error) {
+	rsp, err := c.TemplatescreateWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTemplatescreateResponse(rsp)
+}
+
+func (c *ClientWithResponses) TemplatescreateWithResponse(ctx context.Context, body TemplatescreateJSONRequestBody, reqEditors ...RequestEditorFn) (*TemplatescreateResponse, error) {
+	rsp, err := c.Templatescreate(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTemplatescreateResponse(rsp)
+}
+
+// VmassignTagAliasWithBodyWithResponse request with arbitrary body returning *VmassignTagAliasResponse
+func (c *ClientWithResponses) VmassignTagAliasWithBodyWithResponse(ctx context.Context, namespace string, alias string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*VmassignTagAliasResponse, error) {
+	rsp, err := c.VmassignTagAliasWithBody(ctx, namespace, alias, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseVmassignTagAliasResponse(rsp)
+}
+
+func (c *ClientWithResponses) VmassignTagAliasWithResponse(ctx context.Context, namespace string, alias string, body VmassignTagAliasJSONRequestBody, reqEditors ...RequestEditorFn) (*VmassignTagAliasResponse, error) {
+	rsp, err := c.VmassignTagAlias(ctx, namespace, alias, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseVmassignTagAliasResponse(rsp)
+}
+
 // VmlistClustersWithResponse request returning *VmlistClustersResponse
 func (c *ClientWithResponses) VmlistClustersWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*VmlistClustersResponse, error) {
 	rsp, err := c.VmlistClusters(ctx, reqEditors...)
@@ -4691,6 +5308,15 @@ func (c *ClientWithResponses) VmlistClustersWithResponse(ctx context.Context, re
 		return nil, err
 	}
 	return ParseVmlistClustersResponse(rsp)
+}
+
+// VmlistRunningVmsWithResponse request returning *VmlistRunningVmsResponse
+func (c *ClientWithResponses) VmlistRunningVmsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*VmlistRunningVmsResponse, error) {
+	rsp, err := c.VmlistRunningVms(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseVmlistRunningVmsResponse(rsp)
 }
 
 // VmcreateTagWithBodyWithResponse request with arbitrary body returning *VmcreateTagResponse
@@ -5184,6 +5810,58 @@ func ParsePreviewTokenupdateResponse(rsp *http.Response) (*PreviewTokenupdateRes
 	return response, nil
 }
 
+// ParseTemplatescreateResponse parses an HTTP response from a TemplatescreateWithResponse call
+func ParseTemplatescreateResponse(rsp *http.Response) (*TemplatescreateResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &TemplatescreateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest TemplateCreateResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseVmassignTagAliasResponse parses an HTTP response from a VmassignTagAliasWithResponse call
+func ParseVmassignTagAliasResponse(rsp *http.Response) (*VmassignTagAliasResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &VmassignTagAliasResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest VMAssignTagAliasResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseVmlistClustersResponse parses an HTTP response from a VmlistClustersWithResponse call
 func ParseVmlistClustersResponse(rsp *http.Response) (*VmlistClustersResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -5200,6 +5878,32 @@ func ParseVmlistClustersResponse(rsp *http.Response) (*VmlistClustersResponse, e
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest VMListClustersResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseVmlistRunningVmsResponse parses an HTTP response from a VmlistRunningVmsWithResponse call
+func ParseVmlistRunningVmsResponse(rsp *http.Response) (*VmlistRunningVmsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &VmlistRunningVmsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest VMListRunningVMsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
